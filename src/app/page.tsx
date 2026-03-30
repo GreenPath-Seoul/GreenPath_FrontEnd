@@ -1,66 +1,97 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { Bike } from "lucide-react";
+import { useRouter } from "next/navigation";
+import BottomNav from "@/components/BottomNav";
+
+export default function HomeView() {
+  const router = useRouter();
+  const [mood, setMood] = useState("조용한 곳");
+  const [time, setTime] = useState("1시간");
+  const [difficulty, setDifficulty] = useState("초급 (평지)");
+
+  const moods = ["조용한 곳", "사진 명소", "역사 중심", "힙한 골목"];
+  const times = ["1시간", "2시간", "반나절"];
+  const difficulties = ["초급 (평지)", "중급", "상관없음"];
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="container">
+      <div className="content">
+        <header className="header">
+          <div className="header-title">
+            <Bike size={24} color="#59d58d" />
+            <span style={{ color: "black", letterSpacing: "-0.5px" }}>Seoul Renaissance Ride</span>
+          </div>
+          <div className="header-subtitle">AI가 추천하는 서울 문화재 따릉이 여행</div>
+        </header>
+
+        <div className="section" style={{ marginTop: "16px" }}>
+          <div style={{ fontSize: "18px", fontWeight: "600", marginBottom: "24px", color: "black" }}>
+            오늘 어떤 여행을 하고 싶나요?
+          </div>
+
+          <div className="section-title">분위기</div>
+          <div className="chips-row">
+            {moods.map((m) => (
+              <button
+                key={m}
+                className={`chip ${mood === m ? "active" : ""}`}
+                onClick={() => setMood(m)}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="section">
+          <div className="section-title">시간</div>
+          <div className="chips-row">
+            {times.map((t) => (
+              <button
+                key={t}
+                className={`chip ${time === t ? "active" : ""}`}
+                onClick={() => setTime(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
-      </main>
+
+        <div className="section">
+          <div className="section-title">난이도</div>
+          <div className="chips-row">
+            {difficulties.map((d) => (
+              <button
+                key={d}
+                className={`chip ${difficulty === d ? "active" : ""}`}
+                onClick={() => setDifficulty(d)}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="fixed-bottom">
+          <button
+            className="btn-primary"
+            onClick={() => {
+              if (localStorage.getItem("isLoggedIn") === "true") {
+                router.push("/course");
+              } else {
+                router.push("/login");
+              }
+            }}
+          >
+            AI 코스 추천 받기
+          </button>
+        </div>
+      </div>
+
+      <BottomNav />
     </div>
   );
 }

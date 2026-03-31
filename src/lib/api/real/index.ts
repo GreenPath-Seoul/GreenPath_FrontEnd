@@ -1,5 +1,11 @@
 import { API_CONFIG } from "../config";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "../types";
+import { AuthApi, Configuration } from "@/generated/api";
+
+const authApi = new AuthApi(new Configuration({
+  basePath: API_CONFIG.BASE_URL,
+  accessToken: () => localStorage.getItem("accessToken") || "",
+}));
 
 export const getCourseRecommendation = async (mood: string, time: string, difficulty: string): Promise<CourseRecommendation> => {
   const params = new URLSearchParams({ mood, time, difficulty });
@@ -22,27 +28,57 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   return res.json();
 };
 
-export const login = async (id: string, pw: string): Promise<AuthResponse> => {
-  const res = await fetch(`${API_CONFIG.BASE_URL}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, pw })
-  });
-  return res.json();
+export const login = async (email: string, password: string): Promise<AuthResponse> => {
+  try {
+    const response = await authApi.login({ email, password });
+    const apiRes = response.data;
+    
+    return {
+      success: apiRes.status === 200 || apiRes.status === undefined,
+      message: apiRes.message,
+      accessToken: apiRes.data?.accessToken,
+      refreshToken: apiRes.data?.refreshToken,
+      tokenType: apiRes.data?.tokenType,
+      expiresIn: apiRes.data?.accessTokenExpiresIn,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "로그인에 실패했습니다.",
+    };
+  }
 };
 
-export const signup = async (id: string, pw: string, name: string): Promise<AuthResponse> => {
-  const res = await fetch(`${API_CONFIG.BASE_URL}/api/auth/signup`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, pw, name })
-  });
-  return res.json();
+export const signup = async (email: string, password: string, name: string): Promise<AuthResponse> => {
+  try {
+    const response = await authApi.signUp({ email, password, name });
+    const apiRes = response.data;
+    
+    return {
+      success: apiRes.status === 200 || apiRes.status === undefined,
+      message: apiRes.message,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "회원가입에 실패했습니다.",
+    };
+  }
 };
 
 export const logout = async (): Promise<AuthResponse> => {
-  const res = await fetch(`${API_CONFIG.BASE_URL}/api/auth/logout`, {
-    method: "POST"
-  });
-  return res.json();
+  try {
+    const response = await authApi.logout();
+    const apiRes = response.data;
+    
+    return {
+      success: apiRes.status === 200 || apiRes.status === undefined,
+      message: apiRes.message,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "로그아웃에 실패했습니다.",
+    };
+  }
 };

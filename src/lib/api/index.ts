@@ -28,19 +28,13 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
 };
 
 export const login = async (id: string, pw: string): Promise<AuthResponse> => {
-  return API_CONFIG.USE_MOCK
-    ? mockApi.login(id, pw)
-    : realApi.login(id, pw);
+  return realApi.login(id, pw);
 };
 
 export const signup = async (id: string, pw: string, name: string): Promise<AuthResponse> => {
-  return API_CONFIG.USE_MOCK
-    ? mockApi.signup(id, pw, name)
-    : realApi.signup(id, pw, name);
+  return realApi.signup(id, pw, name);
 };
 
 export const logout = async (): Promise<AuthResponse> => {
-  return API_CONFIG.USE_MOCK
-    ? mockApi.logout()
-    : realApi.logout();
+  return realApi.logout();
 };

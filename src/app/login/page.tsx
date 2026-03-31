@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bike } from "lucide-react";
 import { login } from "@/lib/api";
+import { API_CONFIG } from "@/lib/api/config";
 
 export default function LoginView() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function LoginView() {
       const res = await login(id, pw);
       if (res.success) {
         localStorage.setItem("isLoggedIn", "true");
+        if (res.accessToken) localStorage.setItem("accessToken", res.accessToken);
+        if (res.refreshToken) localStorage.setItem("refreshToken", res.refreshToken);
         router.push("/");
       } else {
         alert(res.message);
@@ -72,8 +75,7 @@ export default function LoginView() {
         <button 
           style={{ padding: "16px", width: "100%", borderRadius: "12px", backgroundColor: "#FEE500", color: "#000000", fontWeight: "600", fontSize: "16px", marginBottom: "12px", border: "none", cursor: "pointer" }}
           onClick={() => {
-            localStorage.setItem("isLoggedIn", "true");
-            router.push("/");
+            window.location.href = `${API_CONFIG.BASE_URL}/oauth2/authorization/kakao`;
           }}
         >
           카카오로 시작하기
@@ -81,8 +83,7 @@ export default function LoginView() {
         <button 
           style={{ padding: "16px", width: "100%", borderRadius: "12px", backgroundColor: "#03C75A", color: "#ffffff", fontWeight: "600", fontSize: "16px", marginBottom: "24px", border: "none", cursor: "pointer" }}
           onClick={() => {
-            localStorage.setItem("isLoggedIn", "true");
-            router.push("/");
+            window.location.href = `${API_CONFIG.BASE_URL}/oauth2/authorization/naver`;
           }}
         >
           네이버로 시작하기

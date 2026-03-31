@@ -31,6 +31,8 @@ export default function MyView() {
     if (confirm("로그아웃 하시겠습니까?")) {
       await logout();
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       router.push("/login");
     }
   };

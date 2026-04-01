@@ -29,6 +29,12 @@ export interface ApiResponseCourseExploreResponse {
     'message'?: string;
     'data'?: CourseExploreResponse;
 }
+export interface ApiResponseCourseRecordResultResponse {
+    'timestamp'?: string;
+    'status'?: number;
+    'message'?: string;
+    'data'?: CourseRecordResultResponse;
+}
 export interface ApiResponseCourseResponse {
     'timestamp'?: string;
     'status'?: number;
@@ -40,6 +46,12 @@ export interface ApiResponseLong {
     'status'?: number;
     'message'?: string;
     'data'?: number;
+}
+export interface ApiResponseMyPageResponse {
+    'timestamp'?: string;
+    'status'?: number;
+    'message'?: string;
+    'data'?: MyPageResponse;
 }
 export interface ApiResponseString {
     'timestamp'?: string;
@@ -59,12 +71,34 @@ export interface ApiResponseVoid {
     'message'?: string;
     'data'?: object;
 }
+export interface BadgeInfo {
+    'code'?: string;
+    'name'?: string;
+}
+export interface CO2 {
+    'amount'?: number;
+    'treeEquivalent'?: number;
+}
+export interface CourseCompleteRequest {
+    'courseId'?: number;
+    'startTime'?: string;
+    'endTime'?: string;
+    'visitedSpotIds'?: Array<number>;
+    'distance'?: number;
+}
 export interface CourseExploreResponse {
     'name'?: string;
     'description'?: string;
     'latitude'?: number;
     'longitude'?: number;
     'imageUrl'?: string;
+}
+export interface CourseRecordResultResponse {
+    'recordId'?: number;
+    'summary'?: Summary;
+    'co2'?: CO2;
+    'reward'?: Reward;
+    'badge'?: BadgeInfo;
 }
 export interface CourseRequest {
     'mood'?: CourseRequestMoodEnum;
@@ -147,8 +181,25 @@ export interface LoginRequest {
     'email': string;
     'password': string;
 }
+export interface MyPageResponse {
+    'user'?: UserInfo;
+    'stats'?: Stats;
+    'badges'?: Array<BadgeInfo>;
+    'recentRecords'?: Array<RecentRecord>;
+}
+export interface RecentRecord {
+    'recordId'?: number;
+    'title'?: string;
+    'date'?: string;
+    'point'?: number;
+}
 export interface ReissueRequest {
     'refreshToken': string;
+}
+export interface Reward {
+    'basePoint'?: number;
+    'bonusPoint'?: number;
+    'totalPoint'?: number;
 }
 /**
  * 회원가입 요청 데이터
@@ -167,11 +218,27 @@ export interface SignUpRequest {
      */
     'name': string;
 }
+export interface Stats {
+    'totalCo2'?: number;
+    'totalDistance'?: number;
+    'visitedCount'?: number;
+    'totalPoint'?: number;
+}
+export interface Summary {
+    'distance'?: number;
+    'duration'?: number;
+    'visitedCount'?: number;
+}
 export interface TokenResponse {
     'accessToken'?: string;
     'refreshToken'?: string;
     'tokenType'?: string;
     'accessTokenExpiresIn'?: number;
+}
+export interface UserInfo {
+    'name'?: string;
+    'level'?: number;
+    'levelName'?: string;
 }
 
 /**
@@ -572,6 +639,45 @@ export class AuthApi extends BaseAPI {
 export const CourseApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * 탐방 종료 시 주행 거리 및 방문 정보를 기록하고 포인트를 획득합니다.
+         * @summary 탐방 완료 처리
+         * @param {CourseCompleteRequest} courseCompleteRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        completeExploration: async (courseCompleteRequest: CourseCompleteRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'courseCompleteRequest' is not null or undefined
+            assertParamExists('completeExploration', 'courseCompleteRequest', courseCompleteRequest)
+            const localVarPath = `/api/v1/courses/complete`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(courseCompleteRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
          * @summary 경유지 상세 정보 조회
          * @param {number} courseId 
@@ -660,6 +766,19 @@ export const CourseApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = CourseApiAxiosParamCreator(configuration)
     return {
         /**
+         * 탐방 종료 시 주행 거리 및 방문 정보를 기록하고 포인트를 획득합니다.
+         * @summary 탐방 완료 처리
+         * @param {CourseCompleteRequest} courseCompleteRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async completeExploration(courseCompleteRequest: CourseCompleteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseCourseRecordResultResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.completeExploration(courseCompleteRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CourseApi.completeExploration']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
          * @summary 경유지 상세 정보 조회
          * @param {number} courseId 
@@ -696,6 +815,16 @@ export const CourseApiFactory = function (configuration?: Configuration, basePat
     const localVarFp = CourseApiFp(configuration)
     return {
         /**
+         * 탐방 종료 시 주행 거리 및 방문 정보를 기록하고 포인트를 획득합니다.
+         * @summary 탐방 완료 처리
+         * @param {CourseCompleteRequest} courseCompleteRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        completeExploration(courseCompleteRequest: CourseCompleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseCourseRecordResultResponse> {
+            return localVarFp.completeExploration(courseCompleteRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
          * @summary 경유지 상세 정보 조회
          * @param {number} courseId 
@@ -724,6 +853,17 @@ export const CourseApiFactory = function (configuration?: Configuration, basePat
  */
 export class CourseApi extends BaseAPI {
     /**
+     * 탐방 종료 시 주행 거리 및 방문 정보를 기록하고 포인트를 획득합니다.
+     * @summary 탐방 완료 처리
+     * @param {CourseCompleteRequest} courseCompleteRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public completeExploration(courseCompleteRequest: CourseCompleteRequest, options?: RawAxiosRequestConfig) {
+        return CourseApiFp(this.configuration).completeExploration(courseCompleteRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
      * @summary 경유지 상세 정보 조회
      * @param {number} courseId 
@@ -744,6 +884,104 @@ export class CourseApi extends BaseAPI {
      */
     public recommend(courseRequest?: CourseRequest, options?: RawAxiosRequestConfig) {
         return CourseApiFp(this.configuration).recommend(courseRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * MemberApi - axios parameter creator
+ */
+export const MemberApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 사용자의 레벨, 누적 통계, 획득 뱃지 및 최근 기록을 조회합니다.
+         * @summary 마이페이지 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMyPage: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/members/me/mypage`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MemberApi - functional programming interface
+ */
+export const MemberApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MemberApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 사용자의 레벨, 누적 통계, 획득 뱃지 및 최근 기록을 조회합니다.
+         * @summary 마이페이지 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getMyPage(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseMyPageResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getMyPage(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MemberApi.getMyPage']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MemberApi - factory interface
+ */
+export const MemberApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MemberApiFp(configuration)
+    return {
+        /**
+         * 사용자의 레벨, 누적 통계, 획득 뱃지 및 최근 기록을 조회합니다.
+         * @summary 마이페이지 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMyPage(options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseMyPageResponse> {
+            return localVarFp.getMyPage(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MemberApi - object-oriented interface
+ */
+export class MemberApi extends BaseAPI {
+    /**
+     * 사용자의 레벨, 누적 통계, 획득 뱃지 및 최근 기록을 조회합니다.
+     * @summary 마이페이지 조회
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getMyPage(options?: RawAxiosRequestConfig) {
+        return MemberApiFp(this.configuration).getMyPage(options).then((request) => request(this.axios, this.basePath));
     }
 }
 

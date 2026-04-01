@@ -4,8 +4,61 @@ All URIs are relative to *http://localhost:8080*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
+|[**completeExploration**](#completeexploration) | **POST** /api/v1/courses/complete | 탐방 완료 처리|
 |[**getCourseStopInfo**](#getcoursestopinfo) | **GET** /api/v1/courses/{courseId}/stops/{stopOrder} | 경유지 상세 정보 조회|
 |[**recommend**](#recommend) | **POST** /api/v1/courses/recommend | 맞춤 코스 추천|
+
+# **completeExploration**
+> ApiResponseCourseRecordResultResponse completeExploration(courseCompleteRequest)
+
+탐방 종료 시 주행 거리 및 방문 정보를 기록하고 포인트를 획득합니다.
+
+### Example
+
+```typescript
+import {
+    CourseApi,
+    Configuration,
+    CourseCompleteRequest
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new CourseApi(configuration);
+
+let courseCompleteRequest: CourseCompleteRequest; //
+
+const { status, data } = await apiInstance.completeExploration(
+    courseCompleteRequest
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **courseCompleteRequest** | **CourseCompleteRequest**|  | |
+
+
+### Return type
+
+**ApiResponseCourseRecordResultResponse**
+
+### Authorization
+
+[jwtAuth](../README.md#jwtAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: */*
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getCourseStopInfo**
 > ApiResponseCourseExploreResponse getCourseStopInfo()

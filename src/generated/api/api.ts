@@ -23,11 +23,29 @@ import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
+export interface ApiResponseCourseExploreResponse {
+    'timestamp'?: string;
+    'status'?: number;
+    'message'?: string;
+    'data'?: CourseExploreResponse;
+}
+export interface ApiResponseCourseResponse {
+    'timestamp'?: string;
+    'status'?: number;
+    'message'?: string;
+    'data'?: CourseResponse;
+}
 export interface ApiResponseLong {
     'timestamp'?: string;
     'status'?: number;
     'message'?: string;
     'data'?: number;
+}
+export interface ApiResponseString {
+    'timestamp'?: string;
+    'status'?: number;
+    'message'?: string;
+    'data'?: string;
 }
 export interface ApiResponseTokenResponse {
     'timestamp'?: string;
@@ -41,6 +59,83 @@ export interface ApiResponseVoid {
     'message'?: string;
     'data'?: object;
 }
+export interface CourseExploreResponse {
+    'name'?: string;
+    'description'?: string;
+    'latitude'?: number;
+    'longitude'?: number;
+}
+export interface CourseRequest {
+    'mood'?: CourseRequestMoodEnum;
+    'duration'?: CourseRequestDurationEnum;
+    'level'?: CourseRequestLevelEnum;
+    'location'?: CourseRequestLocationEnum;
+    'latitude'?: number;
+    'longitude'?: number;
+}
+
+export const CourseRequestMoodEnum = {
+    Quiet: 'QUIET',
+    Photo: 'PHOTO',
+    History: 'HISTORY',
+    Hip: 'HIP',
+} as const;
+
+export type CourseRequestMoodEnum = typeof CourseRequestMoodEnum[keyof typeof CourseRequestMoodEnum];
+export const CourseRequestDurationEnum = {
+    OneHour: 'ONE_HOUR',
+    TwoHours: 'TWO_HOURS',
+    HalfDay: 'HALF_DAY',
+} as const;
+
+export type CourseRequestDurationEnum = typeof CourseRequestDurationEnum[keyof typeof CourseRequestDurationEnum];
+export const CourseRequestLevelEnum = {
+    Easy: 'EASY',
+    Medium: 'MEDIUM',
+    Any: 'ANY',
+} as const;
+
+export type CourseRequestLevelEnum = typeof CourseRequestLevelEnum[keyof typeof CourseRequestLevelEnum];
+export const CourseRequestLocationEnum = {
+    Nearby: 'NEARBY',
+    Any: 'ANY',
+} as const;
+
+export type CourseRequestLocationEnum = typeof CourseRequestLocationEnum[keyof typeof CourseRequestLocationEnum];
+
+export interface CourseResponse {
+    'courseId'?: number;
+    'title'?: string;
+    'description'?: string;
+    'summary'?: CourseSummary;
+    'stops'?: Array<CourseStop>;
+    'polyline'?: string;
+    'createdAt'?: string;
+}
+export interface CourseStop {
+    'order'?: number;
+    'name'?: string;
+    'description'?: string;
+    'stayMinutes'?: number;
+    'latitude'?: number;
+    'longitude'?: number;
+    'imageUrl'?: string;
+}
+export interface CourseSummary {
+    'distanceKm'?: number;
+    'durationMinutes'?: number;
+    'difficulty'?: CourseSummaryDifficultyEnum;
+    'carbonReductionKg'?: number;
+}
+
+export const CourseSummaryDifficultyEnum = {
+    Easy: 'EASY',
+    Medium: 'MEDIUM',
+    Any: 'ANY',
+} as const;
+
+export type CourseSummaryDifficultyEnum = typeof CourseSummaryDifficultyEnum[keyof typeof CourseSummaryDifficultyEnum];
+
 /**
  * 로그인 요청 데이터
  */
@@ -465,6 +560,295 @@ export class AuthApi extends BaseAPI {
      */
     public signUp(signUpRequest: SignUpRequest, options?: RawAxiosRequestConfig) {
         return AuthApiFp(this.configuration).signUp(signUpRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * CourseApi - axios parameter creator
+ */
+export const CourseApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
+         * @summary 경유지 상세 정보 조회
+         * @param {number} courseId 
+         * @param {number} stopOrder 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCourseStopInfo: async (courseId: number, stopOrder: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'courseId' is not null or undefined
+            assertParamExists('getCourseStopInfo', 'courseId', courseId)
+            // verify required parameter 'stopOrder' is not null or undefined
+            assertParamExists('getCourseStopInfo', 'stopOrder', stopOrder)
+            const localVarPath = `/api/v1/courses/{courseId}/stops/{stopOrder}`
+                .replace(`{${"courseId"}}`, encodeURIComponent(String(courseId)))
+                .replace(`{${"stopOrder"}}`, encodeURIComponent(String(stopOrder)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
+         * @summary 맞춤 코스 추천
+         * @param {CourseRequest} [courseRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        recommend: async (courseRequest?: CourseRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/courses/recommend`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(courseRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * CourseApi - functional programming interface
+ */
+export const CourseApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = CourseApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
+         * @summary 경유지 상세 정보 조회
+         * @param {number} courseId 
+         * @param {number} stopOrder 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getCourseStopInfo(courseId: number, stopOrder: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseCourseExploreResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCourseStopInfo(courseId, stopOrder, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CourseApi.getCourseStopInfo']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
+         * @summary 맞춤 코스 추천
+         * @param {CourseRequest} [courseRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async recommend(courseRequest?: CourseRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseCourseResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.recommend(courseRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CourseApi.recommend']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * CourseApi - factory interface
+ */
+export const CourseApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = CourseApiFp(configuration)
+    return {
+        /**
+         * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
+         * @summary 경유지 상세 정보 조회
+         * @param {number} courseId 
+         * @param {number} stopOrder 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCourseStopInfo(courseId: number, stopOrder: number, options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseCourseExploreResponse> {
+            return localVarFp.getCourseStopInfo(courseId, stopOrder, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
+         * @summary 맞춤 코스 추천
+         * @param {CourseRequest} [courseRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        recommend(courseRequest?: CourseRequest, options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseCourseResponse> {
+            return localVarFp.recommend(courseRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * CourseApi - object-oriented interface
+ */
+export class CourseApi extends BaseAPI {
+    /**
+     * 탐방 중인 코스의 특정 순서 경유지 정보를 가져옵니다.
+     * @summary 경유지 상세 정보 조회
+     * @param {number} courseId 
+     * @param {number} stopOrder 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getCourseStopInfo(courseId: number, stopOrder: number, options?: RawAxiosRequestConfig) {
+        return CourseApiFp(this.configuration).getCourseStopInfo(courseId, stopOrder, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
+     * @summary 맞춤 코스 추천
+     * @param {CourseRequest} [courseRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public recommend(courseRequest?: CourseRequest, options?: RawAxiosRequestConfig) {
+        return CourseApiFp(this.configuration).recommend(courseRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * MemberPreferenceApi - axios parameter creator
+ */
+export const MemberPreferenceApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 분위기, 소급시간, 난이도 및 좌표를 저장합니다.
+         * @summary 사용자 취향 설정/업데이트
+         * @param {CourseRequest} courseRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        savePreference: async (courseRequest: CourseRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'courseRequest' is not null or undefined
+            assertParamExists('savePreference', 'courseRequest', courseRequest)
+            const localVarPath = `/api/v1/members/preferences`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(courseRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MemberPreferenceApi - functional programming interface
+ */
+export const MemberPreferenceApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MemberPreferenceApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 분위기, 소급시간, 난이도 및 좌표를 저장합니다.
+         * @summary 사용자 취향 설정/업데이트
+         * @param {CourseRequest} courseRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async savePreference(courseRequest: CourseRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseString>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.savePreference(courseRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MemberPreferenceApi.savePreference']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MemberPreferenceApi - factory interface
+ */
+export const MemberPreferenceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MemberPreferenceApiFp(configuration)
+    return {
+        /**
+         * 분위기, 소급시간, 난이도 및 좌표를 저장합니다.
+         * @summary 사용자 취향 설정/업데이트
+         * @param {CourseRequest} courseRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        savePreference(courseRequest: CourseRequest, options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseString> {
+            return localVarFp.savePreference(courseRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MemberPreferenceApi - object-oriented interface
+ */
+export class MemberPreferenceApi extends BaseAPI {
+    /**
+     * 분위기, 소급시간, 난이도 및 좌표를 저장합니다.
+     * @summary 사용자 취향 설정/업데이트
+     * @param {CourseRequest} courseRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public savePreference(courseRequest: CourseRequest, options?: RawAxiosRequestConfig) {
+        return MemberPreferenceApiFp(this.configuration).savePreference(courseRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

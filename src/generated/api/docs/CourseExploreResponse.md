@@ -5,6 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**id** | **number** |  | [optional] [default to undefined]
+**courseId** | **number** |  | [optional] [default to undefined]
 **name** | **string** |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
 **latitude** | **number** |  | [optional] [default to undefined]
@@ -17,6 +19,8 @@ Name | Type | Description | Notes
 import { CourseExploreResponse } from './api';
 
 const instance: CourseExploreResponse = {
+    id,
+    courseId,
     name,
     description,
     latitude,

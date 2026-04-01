@@ -87,6 +87,8 @@ export interface CourseCompleteRequest {
     'distance'?: number;
 }
 export interface CourseExploreResponse {
+    'id'?: number;
+    'courseId'?: number;
     'name'?: string;
     'description'?: string;
     'latitude'?: number;

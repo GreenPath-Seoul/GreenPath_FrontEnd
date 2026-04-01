@@ -1,15 +1,55 @@
+import axios from "axios";
 import { API_CONFIG } from "../config";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "../types";
-import { AuthApi, Configuration, MemberPreferenceApi, CourseApi } from "@/generated/api";
+import { AuthApi, Configuration, MemberPreferenceApi, CourseApi, MemberApi } from "@/generated/api";
+
+const axiosInstance = axios.create();
+
+// 401 에러(인증 만료) 처리 인터셉터
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("Unauthorized! Redirecting to login...");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 const config = new Configuration({
   basePath: API_CONFIG.BASE_URL,
   accessToken: () => localStorage.getItem("accessToken") || "",
 });
 
-const authApi = new AuthApi(config);
-const preferenceApi = new MemberPreferenceApi(config);
-const courseApi = new CourseApi(config);
+const authApi = new AuthApi(config, undefined, axiosInstance);
+const preferenceApi = new MemberPreferenceApi(config, undefined, axiosInstance);
+const courseApi = new CourseApi(config, undefined, axiosInstance);
+const memberApi = new MemberApi(config, undefined, axiosInstance);
+
+export const completeExploration = async (data: any) => {
+  try {
+    const response = await courseApi.completeExploration(data);
+    return response.data.data; // CourseRecordResultResponse
+  } catch (error: any) {
+    console.error("Course completion failed:", error);
+    throw error;
+  }
+};
+
+export const getMyPage = async () => {
+  try {
+    const response = await memberApi.getMyPage();
+    return response.data.data; // MyPageResponse
+  } catch (error: any) {
+    console.error("Getting MyPage failed:", error);
+    throw error;
+  }
+};
 
 export const recommendCourse = async (data: any) => {
   try {

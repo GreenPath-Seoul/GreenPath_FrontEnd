@@ -15,6 +15,14 @@ export const getCourseStopInfo = async (courseId: number, stopOrder: number) => 
   return realApi.getCourseStopInfo(courseId, stopOrder);
 };
 
+export const completeExploration = async (data: any) => {
+  return realApi.completeExploration(data);
+};
+
+export const getMyPage = async () => {
+  return realApi.getMyPage();
+};
+
 export const getCourseRecommendation = async (mood: string, time: string, difficulty: string): Promise<CourseRecommendation> => {
   return API_CONFIG.USE_MOCK 
     ? mockApi.getCourseRecommendation(mood, time, difficulty)

@@ -49,6 +49,20 @@ export default function NavigationView() {
 
     const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${stopInfo.name},${stopInfo.latitude},${stopInfo.longitude}`;
     window.open(kakaoMapUrl, "_blank");
+    
+    // 탐방 시작 정보 저장
+    if (!localStorage.getItem("explorationStartTime")) {
+      localStorage.setItem("explorationStartTime", new Date().toISOString());
+      localStorage.removeItem("visitedSpotIds"); // 이전 방문 기록 초기화
+    }
+    
+    // 코스 데이터에서 거리 정보 가져와 저장 (첫 번째 경유지 시작 시에만)
+    const savedData = localStorage.getItem("currentCourseData");
+    if (savedData) {
+      const courseData = JSON.parse(savedData);
+      localStorage.setItem("explorationDistance", (courseData.summary?.distanceKm || 0).toString());
+    }
+    
     setIsStarted(true);
   };
 

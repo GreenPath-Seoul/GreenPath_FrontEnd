@@ -5,13 +5,14 @@ import { ArrowLeft, Play } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
 import { useEffect, useState } from "react";
-import { getCourseStopInfo } from "@/lib/api";
+import { getCourseStopInfo, completeExploration } from "@/lib/api";
 
 export default function ArrivalView() {
   const router = useRouter();
   const [stopInfo, setStopInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isLastStop, setIsLastStop] = useState(false);
+  const [finishing, setFinishing] = useState(false);
 
   useEffect(() => {
     const courseId = localStorage.getItem("currentCourseId");
@@ -21,9 +22,23 @@ export default function ArrivalView() {
     if (courseId) {
       getCourseStopInfo(Number(courseId), Number(stopOrder))
         .then((res) => {
-          setStopInfo(res);
-          setLoading(false);
-          setIsLastStop(Number(stopOrder) >= Number(totalStopsCount));
+          if (res) {
+            setStopInfo(res);
+            setLoading(false);
+            setIsLastStop(Number(stopOrder) >= Number(totalStopsCount));
+
+            // 실시간 방문 기록 업데이트
+            if (res.id !== undefined) {
+              const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
+              let visitedList: number[] = JSON.parse(visitedJson);
+              if (!visitedList.includes(res.id)) {
+                visitedList.push(res.id);
+                localStorage.setItem("visitedSpotIds", JSON.stringify(visitedList));
+              }
+            }
+          } else {
+            setLoading(false);
+          }
         })
         .catch(() => setLoading(false));
     } else {
@@ -31,9 +46,60 @@ export default function ArrivalView() {
     }
   }, []);
 
-  const handleNext = () => {
-    if (isLastStop) {
+  const handleFinishExploration = async () => {
+    try {
+      setFinishing(true);
+      const courseId = localStorage.getItem("currentCourseId");
+      const startTime = localStorage.getItem("explorationStartTime");
+      const distance = localStorage.getItem("explorationDistance");
+      const endTime = new Date().toISOString();
+
+      if (!courseId || !startTime) {
+        router.push("/record");
+        return;
+      }
+
+      // 최종 방문 목록 가져오기
+      const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
+      let visitedList: number[] = JSON.parse(visitedJson);
+
+      const res = await completeExploration({
+        courseId: Number(courseId),
+        startTime: startTime,
+        endTime: endTime,
+        distance: Number(distance) || 0,
+        visitedSpotIds: visitedList
+      });
+
+      localStorage.setItem("lastExplorationResult", JSON.stringify(res));
+      
+      // 탐방 세션 초기화
+      localStorage.removeItem("explorationStartTime");
+      localStorage.removeItem("explorationDistance");
+      localStorage.removeItem("visitedSpotIds");
+      
       router.push("/record");
+    } catch (error) {
+      console.error("Failed to complete exploration:", error);
+      router.push("/record");
+    } finally {
+      setFinishing(false);
+    }
+  };
+
+  const handleNext = () => {
+    // 현재 경유지 방문 기록
+    if (stopInfo && stopInfo.id !== undefined) {
+      const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
+      let visitedList: number[] = JSON.parse(visitedJson);
+      if (!visitedList.includes(stopInfo.id)) {
+        visitedList.push(stopInfo.id);
+        localStorage.setItem("visitedSpotIds", JSON.stringify(visitedList));
+      }
+    }
+
+    if (isLastStop) {
+      handleFinishExploration();
     } else {
       const currentOrder = Number(localStorage.getItem("currentStopOrder") || "1");
       localStorage.setItem("currentStopOrder", (currentOrder + 1).toString());
@@ -90,16 +156,22 @@ export default function ArrivalView() {
           </div>
         </div>
 
-        <button className="btn-primary" style={{ marginBottom: "16px" }} onClick={handleNext}>
-          {isLastStop ? "탐방 완료" : "다음 경유지 안내"}
+        <button 
+          className="btn-primary" 
+          style={{ marginBottom: "16px" }} 
+          onClick={handleNext}
+          disabled={finishing}
+        >
+          {finishing ? "처리 중..." : (isLastStop ? "탐방 완료" : "다음 경유지 안내")}
         </button>
 
         {!isLastStop && (
           <button 
             style={{ width: "100%", padding: "14px 24px", borderRadius: "12px", fontSize: "16px", fontWeight: "600", color: "#6b7280", border: "1px solid #e5e7eb", backgroundColor: "white" }}
-            onClick={() => router.push("/record")}
+            onClick={handleFinishExploration}
+            disabled={finishing}
           >
-            탐방 종료
+            {finishing ? "처리 중..." : "탐방 종료"}
           </button>
         )}
       </div>

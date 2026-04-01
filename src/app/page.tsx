@@ -41,7 +41,12 @@ export default function HomeView() {
   const locations = ["현재 위치 주변", "상관없음"];
 
   const handleRecommend = async () => {
-    if (localStorage.getItem("isLoggedIn") !== "true") {
+    // 로그인 체크 강화
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const hasToken = !!localStorage.getItem("accessToken");
+
+    if (!isLoggedIn || !hasToken) {
+      alert("AI 코스 추천을 받으려면 로그인이 필요합니다.");
       router.push("/login");
       return;
     }

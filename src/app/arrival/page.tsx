@@ -49,12 +49,16 @@ export default function ArrivalView() {
   const handleFinishExploration = async () => {
     try {
       setFinishing(true);
+      
       const courseId = localStorage.getItem("currentCourseId");
-      const startTime = localStorage.getItem("explorationStartTime");
+      const rawStartTime = localStorage.getItem("explorationStartTime") || "";
       const distance = localStorage.getItem("explorationDistance");
-      const endTime = new Date().toISOString();
+      
+      // 밀리초를 제외한 ISO 문자열 생성
+      const endTime = new Date().toISOString().split('.')[0] + 'Z';
+      const formattedStartTime = rawStartTime.split('.')[0].replace('Z', '') + 'Z';
 
-      if (!courseId || !startTime) {
+      if (!courseId || !rawStartTime) {
         router.push("/record");
         return;
       }
@@ -63,13 +67,23 @@ export default function ArrivalView() {
       const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
       let visitedList: number[] = JSON.parse(visitedJson);
 
-      const res = await completeExploration({
+      const requestData = {
         courseId: Number(courseId),
-        startTime: startTime,
+        startTime: formattedStartTime,
         endTime: endTime,
         distance: Number(distance) || 0,
         visitedSpotIds: visitedList
-      });
+      };
+
+      console.log("--- 탐방 시간 정보 확인 ---");
+      console.log("시작 시간 (startTime):", requestData.startTime, `(원래 값: ${rawStartTime})`);
+      console.log("종료 시간 (endTime):", requestData.endTime);
+      console.log("------------------------");
+      console.log(">>> [보내는 데이터] 전체 요청:", requestData);
+
+      const res = await completeExploration(requestData);
+      
+      console.log("<<< [받은 데이터] 탐방 완료 결과:", res);
 
       localStorage.setItem("lastExplorationResult", JSON.stringify(res));
       
@@ -79,8 +93,11 @@ export default function ArrivalView() {
       localStorage.removeItem("visitedSpotIds");
       
       router.push("/record");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to complete exploration:", error);
+      if (error.response?.data) {
+        console.error("Error response details:", error.response.data);
+      }
       router.push("/record");
     } finally {
       setFinishing(false);

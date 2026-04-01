@@ -16,6 +16,11 @@ export default function NavigationView() {
     const courseId = localStorage.getItem("currentCourseId");
     const stopOrder = localStorage.getItem("currentStopOrder") || "1";
 
+    // 탐방이 이미 진행 중인지 확인
+    if (localStorage.getItem("explorationStartTime")) {
+      setIsStarted(true);
+    }
+
     if (courseId) {
       getCourseStopInfo(Number(courseId), Number(stopOrder))
         .then((res) => {
@@ -52,8 +57,10 @@ export default function NavigationView() {
     
     // 탐방 시작 정보 저장
     if (!localStorage.getItem("explorationStartTime")) {
-      localStorage.setItem("explorationStartTime", new Date().toISOString());
+      const startTime = new Date().toISOString().split('.')[0] + 'Z';
+      localStorage.setItem("explorationStartTime", startTime);
       localStorage.removeItem("visitedSpotIds"); // 이전 방문 기록 초기화
+      console.log("탐방 시작 시간 저장됨:", startTime);
     }
     
     // 코스 데이터에서 거리 정보 가져와 저장 (첫 번째 경유지 시작 시에만)

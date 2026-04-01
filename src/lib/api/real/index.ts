@@ -1,6 +1,6 @@
 import { API_CONFIG } from "../config";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "../types";
-import { AuthApi, Configuration, MemberPreferenceApi } from "@/api/generated";
+import { AuthApi, Configuration, MemberPreferenceApi, CourseApi } from "@/generated/api";
 
 const config = new Configuration({
   basePath: API_CONFIG.BASE_URL,
@@ -9,6 +9,27 @@ const config = new Configuration({
 
 const authApi = new AuthApi(config);
 const preferenceApi = new MemberPreferenceApi(config);
+const courseApi = new CourseApi(config);
+
+export const recommendCourse = async (data: any) => {
+  try {
+    const response = await courseApi.recommend(data);
+    return response.data.data; // CourseResponse
+  } catch (error: any) {
+    console.error("Course recommendation failed:", error);
+    throw error;
+  }
+};
+
+export const getCourseStopInfo = async (courseId: number, stopOrder: number) => {
+  try {
+    const response = await courseApi.getCourseStopInfo(courseId, stopOrder);
+    return response.data.data; // CourseExploreResponse
+  } catch (error: any) {
+    console.error("Getting stop info failed:", error);
+    throw error;
+  }
+};
 
 export const savePreference = async (data: any) => {
   try {

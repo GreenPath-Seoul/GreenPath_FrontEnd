@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **description** | **string** |  | [optional] [default to undefined]
 **latitude** | **number** |  | [optional] [default to undefined]
 **longitude** | **number** |  | [optional] [default to undefined]
+**imageUrl** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -20,6 +21,7 @@ const instance: CourseExploreResponse = {
     description,
     latitude,
     longitude,
+    imageUrl,
 };
 ```
 

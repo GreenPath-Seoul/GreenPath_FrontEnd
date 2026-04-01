@@ -64,6 +64,7 @@ export interface CourseExploreResponse {
     'description'?: string;
     'latitude'?: number;
     'longitude'?: number;
+    'imageUrl'?: string;
 }
 export interface CourseRequest {
     'mood'?: CourseRequestMoodEnum;

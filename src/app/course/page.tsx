@@ -10,11 +10,17 @@ import { CourseRecommendation } from "@/lib/api/types";
 export default function CourseView() {
   const router = useRouter();
 
-  const [data, setData] = useState<CourseRecommendation | null>(null);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    // 임시 파라미터로 목업 API 호출
-    getCourseRecommendation("조용한 곳", "1시간", "초급").then(setData);
+    // 세션에 저장된 추천 데이터가 있는지 확인
+    const savedCourse = localStorage.getItem("currentCourseData");
+    if (savedCourse) {
+      setData(JSON.parse(savedCourse));
+    } else {
+      // 데이터가 없으면 기본 목업 호출 (기존 코드 유지)
+      getCourseRecommendation("조용한 곳", "1시간", "초급").then(setData);
+    }
   }, []);
 
   if (!data) {
@@ -41,28 +47,28 @@ export default function CourseView() {
               <MapPin size={20} color="#59d58d" />
               <div>
                 <div style={{ fontSize: "12px", color: "#6b7280" }}>총 거리</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.distance}km</div>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.distanceKm || data.distance || 0}km</div>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <Clock size={20} color="#59d58d" />
               <div>
                 <div style={{ fontSize: "12px", color: "#6b7280" }}>소요 시간</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.duration}</div>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.durationMinutes ? `${data.summary.durationMinutes}분` : data.duration}</div>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <ArrowUpRight size={20} color="#59d58d" />
               <div>
                 <div style={{ fontSize: "12px", color: "#6b7280" }}>난이도</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.difficulty}</div>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.difficulty || data.difficulty}</div>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <Leaf size={20} color="#59d58d" />
               <div>
                 <div style={{ fontSize: "12px", color: "#6b7280" }}>탄소 절감</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.carbonReduction}kg</div>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.carbonReductionKg || data.carbonReduction || 0}kg</div>
               </div>
             </div>
           </div>
@@ -72,20 +78,20 @@ export default function CourseView() {
           <div style={{ fontSize: "16px", fontWeight: "600", marginTop: "24px", marginBottom: "16px", color: "black" }}>경유지</div>
           
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {data.stops.map((stop) => (
-              <div key={stop.id} style={{ display: "flex", alignItems: "center", padding: "12px", border: "1px solid #e5e7eb", borderRadius: "12px", cursor: "pointer", transition: "all 0.2s" }}>
+            {(data.stops || []).map((stop: any, idx: number) => (
+              <div key={idx} style={{ display: "flex", alignItems: "center", padding: "12px", border: "1px solid #e5e7eb", borderRadius: "12px", cursor: "pointer", transition: "all 0.2s" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", overflow: "hidden", marginRight: "12px" }}>
-                  <img src={stop.imgHover} alt={stop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={stop.imageUrl || stop.imgHover} alt={stop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
                     <div style={{ width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#59d58d", color: "white", fontSize: "11px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>
-                      {stop.id}
+                      {stop.order || stop.id}
                     </div>
                     <span style={{ fontSize: "15px", fontWeight: "600", color: "#111827" }}>{stop.name}</span>
                   </div>
-                  <div style={{ fontSize: "13px", color: "#6b7280", marginBottom: "4px" }}>{stop.desc}</div>
-                  <div style={{ fontSize: "12px", color: "#9ca3af" }}>{stop.time}</div>
+                  <div style={{ fontSize: "13px", color: "#6b7280", marginBottom: "4px" }}>{stop.description || stop.desc}</div>
+                  <div style={{ fontSize: "12px", color: "#9ca3af" }}>{stop.stayMinutes ? `체류 시간: ${stop.stayMinutes}분` : stop.time}</div>
                 </div>
                 <ChevronRight size={20} color="#d1d5db" />
               </div>

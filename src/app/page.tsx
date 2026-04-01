@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Bike, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
-import { savePreference } from "@/lib/api";
+import { savePreference, recommendCourse } from "@/lib/api";
 
 const moodMap: Record<string, string> = {
   "조용한 곳": "QUIET",
@@ -64,7 +64,7 @@ export default function HomeView() {
         }
       }
 
-      await savePreference({
+      const response = await recommendCourse({
         mood: moodMap[mood],
         duration: timeMap[time],
         level: levelMap[difficulty],
@@ -72,6 +72,13 @@ export default function HomeView() {
         latitude,
         longitude
       });
+      
+      if (response && response.courseId) {
+        localStorage.setItem("currentCourseId", response.courseId.toString());
+        localStorage.setItem("currentCourseData", JSON.stringify(response));
+        localStorage.setItem("currentCourseStopsCount", (response.stops?.length || 0).toString());
+        localStorage.setItem("currentStopOrder", "1");
+      }
       
       router.push("/course");
     } catch (error) {

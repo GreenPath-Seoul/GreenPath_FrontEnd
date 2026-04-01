@@ -1,11 +1,29 @@
 import { API_CONFIG } from "../config";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "../types";
-import { AuthApi, Configuration } from "@/generated/api";
+import { AuthApi, Configuration, MemberPreferenceApi } from "@/api/generated";
 
-const authApi = new AuthApi(new Configuration({
+const config = new Configuration({
   basePath: API_CONFIG.BASE_URL,
   accessToken: () => localStorage.getItem("accessToken") || "",
-}));
+});
+
+const authApi = new AuthApi(config);
+const preferenceApi = new MemberPreferenceApi(config);
+
+export const savePreference = async (data: any) => {
+  try {
+    const response = await preferenceApi.savePreference(data);
+    return {
+      success: response.data.status === 200 || response.data.status === undefined,
+      message: response.data.message,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "취향 저장에 실패했습니다.",
+    };
+  }
+};
 
 export const getCourseRecommendation = async (mood: string, time: string, difficulty: string): Promise<CourseRecommendation> => {
   const params = new URLSearchParams({ mood, time, difficulty });

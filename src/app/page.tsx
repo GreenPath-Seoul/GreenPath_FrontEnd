@@ -1,19 +1,87 @@
 "use client";
 
 import { useState } from "react";
-import { Bike } from "lucide-react";
+import { Bike, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import { savePreference } from "@/lib/api";
+
+const moodMap: Record<string, string> = {
+  "조용한 곳": "QUIET",
+  "사진 명소": "PHOTO",
+  "역사 중심": "HISTORY",
+  "힙한 골목": "HIP",
+};
+const timeMap: Record<string, string> = {
+  "1시간": "ONE_HOUR",
+  "2시간": "TWO_HOURS",
+  "반나절": "HALF_DAY",
+};
+const levelMap: Record<string, string> = {
+  "초급 (평지)": "EASY",
+  "중급": "MEDIUM",
+  "상관없음": "ANY",
+};
+const locationMap: Record<string, string> = {
+  "현재 위치 주변": "NEARBY",
+  "상관없음": "ANY",
+};
 
 export default function HomeView() {
   const router = useRouter();
   const [mood, setMood] = useState("조용한 곳");
   const [time, setTime] = useState("1시간");
   const [difficulty, setDifficulty] = useState("초급 (평지)");
+  const [locationChoice, setLocationChoice] = useState("현재 위치 주변");
+  const [isLoading, setIsLoading] = useState(false);
 
   const moods = ["조용한 곳", "사진 명소", "역사 중심", "힙한 골목"];
   const times = ["1시간", "2시간", "반나절"];
   const difficulties = ["초급 (평지)", "중급", "상관없음"];
+  const locations = ["현재 위치 주변", "상관없음"];
+
+  const handleRecommend = async () => {
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      router.push("/login");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // 위치 정보 가져오기 (비동기)
+      let latitude = 37.5665;
+      let longitude = 126.9780;
+
+      if (locationChoice === "현재 위치 주변" && navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch (e) {
+          console.warn("Location access denied, using default Seoul coordinates.");
+        }
+      }
+
+      await savePreference({
+        mood: moodMap[mood],
+        duration: timeMap[time],
+        level: levelMap[difficulty],
+        location: locationMap[locationChoice],
+        latitude,
+        longitude
+      });
+      
+      router.push("/course");
+    } catch (error) {
+      console.error("Failed to save preference:", error);
+      // 실패해도 일단 코스 페이지로 이동하도록 처리 (백엔드 확인용)
+      router.push("/course");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container">
@@ -75,18 +143,30 @@ export default function HomeView() {
           </div>
         </div>
 
+        <div className="section">
+          <div className="section-title">위치</div>
+          <div className="chips-row">
+            {locations.map((l) => (
+              <button
+                key={l}
+                className={`chip ${locationChoice === l ? "active" : ""}`}
+                onClick={() => setLocationChoice(l)}
+                style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                {l === "현재 위치 주변" && <MapPin size={14} />}
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="fixed-bottom">
           <button
             className="btn-primary"
-            onClick={() => {
-              if (localStorage.getItem("isLoggedIn") === "true") {
-                router.push("/course");
-              } else {
-                router.push("/login");
-              }
-            }}
+            onClick={handleRecommend}
+            disabled={isLoading}
           >
-            AI 코스 추천 받기
+            {isLoading ? "코스 분석 중..." : "AI 코스 추천 받기"}
           </button>
         </div>
       </div>

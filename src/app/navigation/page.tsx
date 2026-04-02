@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { CourseResponse } from "@/api";
 import { Check, MapPin, Navigation2, ChevronRight, Bike } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { getCourseStopInfo } from "@/lib/api";
 export default function NavigationView() {
   const router = useRouter();
   const [stopInfo, setStopInfo] = useState<any>(null);
-  const [courseData, setCourseData] = useState<any>(null);
+  const [courseData, setCourseData] = useState<CourseResponse | null>(null);
   const [hasViewedGuidance, setHasViewedGuidance] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentStopOrder, setCurrentStopOrder] = useState(1);
@@ -63,7 +64,11 @@ export default function NavigationView() {
     if (!localStorage.getItem("explorationStartTime")) {
       const startTime = new Date().toISOString().split('.')[0] + 'Z';
       localStorage.setItem("explorationStartTime", startTime);
-      localStorage.removeItem("visitedSpotIds"); // 이전 방문 기록 초기화
+      // 전체 거리 저장 (코스 데이터가 있으면 사용, 없으면 0)
+      const totalDist = courseData?.summary?.distanceKm ?? 0;
+      localStorage.setItem("explorationDistance", String(totalDist));
+      // 이전 방문 기록 초기화
+      localStorage.removeItem("visitedSpotIds");
     }
     
     setHasViewedGuidance(true);

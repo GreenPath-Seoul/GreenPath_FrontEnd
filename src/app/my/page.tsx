@@ -4,34 +4,43 @@ import { User, Leaf, Landmark, Bike, Camera, MapIcon, Star, ChevronRight, Trophy
 import BottomNav from "@/components/BottomNav";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getUserProfile, logout } from "@/lib/api";
-import { UserProfile } from "@/lib/api/types";
+import { getMyPage, logout } from "@/lib/api";
 
-const getIcon = (iconName: string) => {
-  switch (iconName) {
-    case 'Landmark': return Landmark;
-    case 'Bike': return Bike;
-    case 'Leaf': return Leaf;
-    case 'Camera': return Camera;
-    case 'MapIcon': return MapIcon;
-    case 'Star': return Star;
+const getIcon = (code?: string) => {
+  switch (code) {
+    case 'HANOK_MASTER': return Landmark;
+    case 'RIDER': return Bike;
+    case 'ECO_FRIENDLY': return Leaf;
+    case 'PHOTOGRAPHER': return Camera;
+    case 'EXPLORER': return MapIcon;
+    case 'STARLIGHT': return Star;
     default: return Star;
   }
 };
 
 export default function MyView() {
   const router = useRouter();
-  const [data, setData] = useState<UserProfile | null>(null);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    getUserProfile("user_123").then(setData);
+    getMyPage().then(setData).catch(err => {
+      console.error(err);
+      // 토큰 만료 등 에러 시 로그인 페이지 유도 가능
+    });
   }, []);
 
   const handleLogout = async () => {
     if (confirm("로그아웃 하시겠습니까?")) {
-      await logout();
-      localStorage.removeItem("isLoggedIn");
-      router.push("/login");
+      try {
+        await logout();
+      } catch (e) {
+        console.error("Logout failed:", e);
+      } finally {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        router.push("/login");
+      }
     }
   };
 
@@ -43,6 +52,9 @@ export default function MyView() {
     );
   }
 
+  const user = data.user || {};
+  const stats = data.stats || {};
+
   return (
     <div className="container">
       <div className="content" style={{ padding: "40px 20px 100px 20px", display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -52,8 +64,8 @@ export default function MyView() {
           <div style={{ backgroundColor: "#59d58d", width: "72px", height: "72px", borderRadius: "36px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px", color: "white" }}>
             <User size={36} />
           </div>
-          <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111827", marginBottom: "4px" }}>{data.name}</h1>
-          <p style={{ fontSize: "14px", color: "#6b7280" }}>{data.role}</p>
+          <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111827", marginBottom: "4px" }}>{user.name || "사용자"}</h1>
+          <p style={{ fontSize: "14px", color: "#6b7280" }}>Level {user.level || 1} · {user.levelName || "초보 탐방가"}</p>
         </div>
 
         {/* 탄소 절감량 */}
@@ -64,9 +76,9 @@ export default function MyView() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
             <span style={{ fontSize: "24px" }}>🌱</span>
-            <span style={{ fontSize: "24px", fontWeight: "700", color: "#16a34a" }}>{data.totalCarbonReduction}kg CO₂</span>
+            <span style={{ fontSize: "24px", fontWeight: "700", color: "#16a34a" }}>{stats.totalCo2 || 0}kg CO₂</span>
           </div>
-          <p style={{ fontSize: "12px", color: "#166534", opacity: 0.8 }}>{data.carbonEquivalent}</p>
+          <p style={{ fontSize: "12px", color: "#166534", opacity: 0.8 }}>소나무 약 {Math.floor((stats.totalCo2 || 0) / 5)}그루를 심은 효과</p>
         </div>
 
         {/* Stats Grid */}
@@ -74,16 +86,16 @@ export default function MyView() {
           <div className="card" style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#6b7280", fontSize: "12px" }}>
               <MapIcon size={14} />
-              <span>방문 문화재</span>
+              <span>방문 경유지</span>
             </div>
-            <span style={{ fontSize: "20px", fontWeight: "700", color: "#111827" }}>{data.totalVisitedSites}곳</span>
+            <span style={{ fontSize: "20px", fontWeight: "700", color: "#111827" }}>{stats.visitedCount || 0}곳</span>
           </div>
           <div className="card" style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#6b7280", fontSize: "12px" }}>
               <Trophy size={14} />
-              <span>획득 포인트</span>
+              <span>누적 포인트</span>
             </div>
-            <span style={{ fontSize: "20px", fontWeight: "700", color: "#59d58d" }}>{data.totalPoints}P</span>
+            <span style={{ fontSize: "20px", fontWeight: "700", color: "#59d58d" }}>{stats.totalPoint || 0}P</span>
           </div>
         </div>
 
@@ -91,12 +103,12 @@ export default function MyView() {
         <div>
           <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#374151", marginBottom: "12px" }}>획득한 배지</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
-            {data.badges.map((badge, idx) => {
-              const Icon = getIcon(badge.iconType);
+            {(data.badges || []).map((badge: any, idx: number) => {
+              const Icon = getIcon(badge.code);
               return (
                 <div key={idx} className="card" style={{ padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                   <Icon size={24} color="#374151" />
-                  <span style={{ fontSize: "12px", color: "#6b7280", textAlign: "center" }}>{badge.name}</span>
+                  <span style={{ fontSize: "12px", color: "#6b7280", textAlign: "center", fontWeight: "500" }}>{badge.name}</span>
                 </div>
               );
             })}
@@ -107,14 +119,14 @@ export default function MyView() {
         <div>
           <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#374151", marginBottom: "12px" }}>최근 기록</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {data.recentRecords.map((record, idx) => (
+            {(data.recentRecords || []).map((record: any, idx: number) => (
               <div key={idx} className="card" style={{ padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <span style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{record.title}</span>
                   <span style={{ fontSize: "12px", color: "#6b7280" }}>{record.date}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontSize: "14px", fontWeight: "600", color: "#59d58d" }}>{record.point}</span>
+                  <span style={{ fontSize: "14px", fontWeight: "600", color: "#59d58d" }}>+{record.point}P</span>
                   <ChevronRight size={16} color="#9ca3af" />
                 </div>
               </div>

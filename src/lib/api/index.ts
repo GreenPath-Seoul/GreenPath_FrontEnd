@@ -3,6 +3,26 @@ import * as mockApi from "./mock/index";
 import * as realApi from "./real/index";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "./types";
 
+export const savePreference = async (data: any): Promise<{ success: boolean; message?: string }> => {
+  return realApi.savePreference(data);
+};
+
+export const recommendCourse = async (data: any) => {
+  return realApi.recommendCourse(data);
+};
+
+export const getCourseStopInfo = async (courseId: number, stopOrder: number) => {
+  return realApi.getCourseStopInfo(courseId, stopOrder);
+};
+
+export const completeExploration = async (data: any) => {
+  return realApi.completeExploration(data);
+};
+
+export const getMyPage = async () => {
+  return realApi.getMyPage();
+};
+
 export const getCourseRecommendation = async (mood: string, time: string, difficulty: string): Promise<CourseRecommendation> => {
   return API_CONFIG.USE_MOCK 
     ? mockApi.getCourseRecommendation(mood, time, difficulty)
@@ -28,19 +48,13 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
 };
 
 export const login = async (id: string, pw: string): Promise<AuthResponse> => {
-  return API_CONFIG.USE_MOCK
-    ? mockApi.login(id, pw)
-    : realApi.login(id, pw);
+  return realApi.login(id, pw);
 };
 
 export const signup = async (id: string, pw: string, name: string): Promise<AuthResponse> => {
-  return API_CONFIG.USE_MOCK
-    ? mockApi.signup(id, pw, name)
-    : realApi.signup(id, pw, name);
+  return realApi.signup(id, pw, name);
 };
 
 export const logout = async (): Promise<AuthResponse> => {
-  return API_CONFIG.USE_MOCK
-    ? mockApi.logout()
-    : realApi.logout();
+  return realApi.logout();
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Leaf, MapIcon as MapIconFill, Navigation2 } from "lucide-react";
+import { Check, MapPin, Navigation2, ChevronRight, Bike } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { useEffect, useState } from "react";
 import { getCourseStopInfo } from "@/lib/api";
@@ -9,16 +9,20 @@ import { getCourseStopInfo } from "@/lib/api";
 export default function NavigationView() {
   const router = useRouter();
   const [stopInfo, setStopInfo] = useState<any>(null);
-  const [isStarted, setIsStarted] = useState(false);
+  const [courseData, setCourseData] = useState<any>(null);
+  const [hasViewedGuidance, setHasViewedGuidance] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [currentStopOrder, setCurrentStopOrder] = useState(1);
 
   useEffect(() => {
     const courseId = localStorage.getItem("currentCourseId");
     const stopOrder = localStorage.getItem("currentStopOrder") || "1";
+    setCurrentStopOrder(Number(stopOrder));
 
-    // 탐방이 이미 진행 중인지 확인
-    if (localStorage.getItem("explorationStartTime")) {
-      setIsStarted(true);
+    // 탐방 정보 확인 로직은 유지하되, 버튼 표시용 로컬 상태는 false로 시작
+    const savedCourseData = localStorage.getItem("currentCourseData");
+    if (savedCourseData) {
+      setCourseData(JSON.parse(savedCourseData));
     }
 
     if (courseId) {
@@ -60,17 +64,9 @@ export default function NavigationView() {
       const startTime = new Date().toISOString().split('.')[0] + 'Z';
       localStorage.setItem("explorationStartTime", startTime);
       localStorage.removeItem("visitedSpotIds"); // 이전 방문 기록 초기화
-      console.log("탐방 시작 시간 저장됨:", startTime);
     }
     
-    // 코스 데이터에서 거리 정보 가져와 저장 (첫 번째 경유지 시작 시에만)
-    const savedData = localStorage.getItem("currentCourseData");
-    if (savedData) {
-      const courseData = JSON.parse(savedData);
-      localStorage.setItem("explorationDistance", (courseData.summary?.distanceKm || 0).toString());
-    }
-    
-    setIsStarted(true);
+    setHasViewedGuidance(true);
   };
 
   if (loading) {
@@ -81,68 +77,164 @@ export default function NavigationView() {
     );
   }
 
-  if (!stopInfo) {
+  if (!stopInfo || !courseData) {
     return (
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div>목표 경유지 정보를 찾을 수 없습니다.</div>
+        <div>탐방 정보를 찾을 수 없습니다.</div>
       </div>
     );
   }
 
+  const totalDistance = courseData.summary?.distanceKm || 4.2;
+  // 임의의 진행 거리 계산 (현재 스톱 번호에 따라)
+  const currentProgressDist = (currentStopOrder / (courseData.stops?.length || 1)) * totalDistance;
+  const progressPercent = Math.min(Math.round((currentStopOrder / (courseData.stops?.length || 1)) * 100), 100);
+
   return (
-    <div className="container" style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#eef8f3" }}>
-      {/* Map Area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative" }}>
-        <MapIconFill size={48} color="#59d58d" />
-        <div style={{ marginTop: "16px", color: "#6b7280", fontSize: "14px", fontWeight: "500" }}>{stopInfo.name} 방향으로 이동 중</div>
+    <div className="container" style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#ffffff" }}>
+      {/* Top Progress Bar Area */}
+      <div style={{ padding: "20px 20px 10px 20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: "600" }}>
+            <Bike size={16} color="#59d58d" />
+            <span>총 {totalDistance}km 중 <span style={{ color: "#59d58d" }}>{currentProgressDist.toFixed(2)}km 진행</span></span>
+          </div>
+          <div style={{ fontSize: "12px", color: "#9ca3af" }}>{progressPercent}%</div>
+        </div>
+        <div style={{ width: "100%", height: "6px", backgroundColor: "#f3f4f6", borderRadius: "3px", overflow: "hidden" }}>
+          <div style={{ width: `${progressPercent}%`, height: "100%", backgroundColor: "#59d58d", transition: "width 0.3s ease" }}></div>
+        </div>
+        <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "8px", color: "#59d58d", fontSize: "14px", fontWeight: "600" }}>
+          <Navigation2 size={16} fill="#59d58d" />
+          <span>{stopInfo.name}까지 이동 중</span>
+        </div>
       </div>
 
-      {/* Bottom Sheet */}
-      <div className="glass-panel" style={{ padding: "24px", paddingBottom: "100px", marginTop: "auto", zIndex: 10 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-          <div style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>목적지 정보</div>
-        </div>
+      <div style={{ padding: "0 20px" }}>
+        <hr style={{ border: "none", borderTop: "1px solid #f3f4f6", margin: "10px 0" }} />
+      </div>
 
-        <div style={{ backgroundColor: "#f9fafb", borderRadius: "12px", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", border: "1px solid #e5e7eb" }}>
-          <div>
-            <div style={{ fontSize: "18px", fontWeight: "700", color: "#111827", marginBottom: "4px" }}>{stopInfo.name}</div>
-            <div style={{ fontSize: "13px", color: "#6b7280", display: "flex", alignItems: "center", gap: "4px" }}>
-              <Navigation2 size={14} /> 약 15분
-            </div>
+      {/* Main Content Area - Route Sketch */}
+      <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
+        <div style={{ fontSize: "18px", fontWeight: "700", marginBottom: "24px", color: "#111827" }}>경로 약도</div>
+
+        <div style={{ position: "relative" }}>
+          {/* Vertical Line */}
+          <div style={{ position: "absolute", left: "15px", top: "20px", bottom: "20px", width: "2px", backgroundColor: "#f3f4f6", zIndex: 0 }}></div>
+
+          {/* Waypoint List */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+            {courseData.stops?.map((stop: any, index: number) => {
+              const order = index + 1;
+              const isVisited = order < currentStopOrder;
+              const isCurrent = order === currentStopOrder;
+              const isFirst = index === 0;
+
+              return (
+                <div 
+                  key={index} 
+                  style={{ 
+                    display: "flex", 
+                    padding: "16px 0", 
+                    position: "relative",
+                    backgroundColor: isCurrent ? "rgba(89, 213, 141, 0.05)" : "transparent",
+                    borderRadius: isCurrent ? "16px" : "0",
+                    marginLeft: "-10px",
+                    paddingLeft: "10px",
+                    marginRight: "-10px",
+                    paddingRight: "10px",
+                  }}
+                >
+                  {/* Status Icon */}
+                  <div style={{ width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1, backgroundColor: isVisited ? "#59d58d" : "white", border: isVisited ? "none" : (isCurrent ? "2px solid #59d58d" : "2px solid #e5e7eb") }}>
+                    {isVisited ? (
+                      <Check size={18} color="white" />
+                    ) : (
+                      isCurrent ? (
+                        <MapPin size={18} color="#59d58d" />
+                      ) : (
+                        <span style={{ fontSize: "13px", fontWeight: "600", color: "#9ca3af" }}>{order}</span>
+                      )
+                    )}
+                  </div>
+
+                  {/* Text Info */}
+                  <div style={{ flex: 1, marginLeft: "16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                      {isFirst && <span style={{ fontSize: "14px", fontWeight: "700", color: isVisited ? "#59d58d" : (isCurrent ? "#59d58d" : "#9ca3af") }}>시작점</span>}
+                      <span style={{ fontSize: "16px", fontWeight: "700", color: isCurrent || isVisited ? "#111827" : "#9ca3af" }}>{stop.name}</span>
+                      {isVisited && (
+                        <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "10px", backgroundColor: "#f3f4f6", color: "#9ca3af", fontWeight: "600" }}>방문 완료</span>
+                      )}
+                      {isCurrent && (
+                        <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", backgroundColor: "#59d58d", color: "white", fontWeight: "600" }}>다음 목적지</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: "13px", color: "#9ca3af", marginBottom: isCurrent ? "8px" : "0" }}>
+                      {index === 0 ? "광화문 따릉이 대여소" : (stop.description || "문화유산 탐방 장소")}
+                    </div>
+                    
+                    {isCurrent && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#59d58d", fontSize: "13px", fontWeight: "600", marginTop: "4px" }}>
+                        <Navigation2 size={12} fill="#59d58d" strokeWidth={3} />
+                        <span>약 5분 소요</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Distance */}
+                  <div style={{ fontSize: "13px", color: "#9ca3af", paddingLeft: "10px", textAlign: "right", minWidth: "50px" }}>
+                    {index === 0 ? "0km" : index === 1 ? "850m" : `${(index * 0.8).toFixed(1)}km`}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div style={{ fontSize: "14px", fontWeight: "600", color: "#6b7280" }}>850m</div>
         </div>
+      </div>
 
-        <div style={{ marginBottom: "24px" }}>
-          <div style={{ fontSize: "14px", fontWeight: "600", color: "#4b5563", marginBottom: "12px" }}>구간 정보</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#4b5563" }}>
-              <AlertTriangle size={16} color="#f59e0b" />
-              <span>교차로에서 차량 주의</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#4b5563" }}>
-              <Leaf size={16} color="#59d58d" />
-              <span>쾌적한 자전거 전용 도로</span>
-            </div>
-          </div>
-        </div>
-
-        {!isStarted ? (
+      {/* Fixed Bottom Buttons Area */}
+      <div style={{ padding: "20px", borderTop: "1px solid #f3f4f6", backgroundColor: "white", zIndex: 100, paddingBottom: "100px" }}>
+        {!hasViewedGuidance ? (
           <button
             className="btn-primary"
             onClick={handleStart}
             style={{ width: "100%" }}
           >
-            탐방 시작
+            길안내 보기
           </button>
         ) : (
-          <button
-            className="btn-primary"
-            onClick={() => router.push("/arrival")}
-            style={{ width: "100%", backgroundColor: "#3b82f6" }}
-          >
-            도착
-          </button>
+          <div style={{ display: "flex", gap: "12px" }}>
+             <button
+              onClick={handleStart}
+              style={{ 
+                flex: 1, 
+                backgroundColor: "white", 
+                border: "2px solid #59d58d", 
+                color: "#59d58d", 
+                padding: "14px", 
+                borderRadius: "12px", 
+                fontWeight: "700",
+                fontSize: "16px"
+              }}
+            >
+              길안내 보기
+            </button>
+            <button
+              onClick={() => router.push("/arrival")}
+              style={{ 
+                flex: 2, 
+                backgroundColor: "#59d58d", 
+                color: "white", 
+                padding: "14px", 
+                borderRadius: "12px", 
+                fontWeight: "700",
+                fontSize: "16px"
+              }}
+            >
+              도착
+            </button>
+          </div>
         )}
       </div>
 

@@ -39,11 +39,12 @@ export default function SignupView() {
   return (
     <div className="container" style={{ padding: "0 20px" }}>
       <div style={{ padding: "20px 0", position: "relative" }}>
-        <button 
+        <button
           onClick={() => router.back()}
           style={{ position: "absolute", left: 0, top: "20px", display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px" }}
         >
           <ArrowLeft size={24} color="#111827" />
+
         </button>
       </div>
 
@@ -55,38 +56,38 @@ export default function SignupView() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "32px" }}>
-          <input 
-            type="text" 
-            placeholder="이름" 
+          <input
+            type="text"
+            placeholder="이름"
             value={name}
             onChange={(e) => setName(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
-          <input 
-            type="text" 
-            placeholder="아이디" 
+          <input
+            type="text"
+            placeholder="아이디"
             value={id}
             onChange={(e) => setId(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
-          <input 
-            type="password" 
-            placeholder="비밀번호" 
+          <input
+            type="password"
+            placeholder="비밀번호"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
-          <input 
-            type="password" 
-            placeholder="비밀번호 확인" 
+          <input
+            type="password"
+            placeholder="비밀번호 확인"
             value={pwConfirm}
             onChange={(e) => setPwConfirm(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
         </div>
 
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           onClick={handleSignup}
           style={{ padding: "16px", marginBottom: "24px" }}
         >

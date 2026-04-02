@@ -43,12 +43,30 @@ export default function NavigationView() {
 
   const name = encodeURIComponent(stopInfo.name);
 
-  const curLat = 37.5665;
-  const curLng = 126.9780;
+  let curLat = 37.5665;
+  let curLng = 126.9780;
 
-  const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        curLat = pos.coords.latitude;
+        curLng = pos.coords.longitude;
 
-  window.location.href = kakaoMapUrl;
+        const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
+
+        window.location.href = kakaoMapUrl;
+      },
+      () => {
+        const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
+
+        window.location.href = kakaoMapUrl;
+      }
+    );
+  } else {
+    const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
+
+    window.location.href = kakaoMapUrl;
+  }
 
   if (!localStorage.getItem("explorationStartTime")) {
     const startTime = new Date().toISOString().split('.')[0] + 'Z';
@@ -61,20 +79,7 @@ export default function NavigationView() {
   }
 
   setHasViewedGuidance(true);
-
-    // 탐방 시작 정보 저장
-    if (!localStorage.getItem("explorationStartTime")) {
-      const startTime = new Date().toISOString().split('.')[0] + 'Z';
-      localStorage.setItem("explorationStartTime", startTime);
-      // 전체 거리 저장 (코스 데이터가 있으면 사용, 없으면 0)
-      const totalDist = courseData?.summary?.distanceKm ?? 0;
-      localStorage.setItem("explorationDistance", String(totalDist));
-      // 이전 방문 기록 초기화
-      localStorage.removeItem("visitedSpotIds");
-    }
-    
-    setHasViewedGuidance(true);
-  };
+};
 
   if (loading) {
     return (
@@ -202,15 +207,6 @@ export default function NavigationView() {
 
       {/* Fixed Bottom Buttons Area */}
       <div style={{ padding: "20px", borderTop: "1px solid #f3f4f6", backgroundColor: "white", zIndex: 100, paddingBottom: "100px" }}>
-        {!hasViewedGuidance ? (
-          <button
-            className="btn-primary"
-            onClick={handleStart}
-            style={{ width: "100%" }}
-          >
-            길안내 보기
-          </button>
-        ) : (
           <div style={{ display: "flex", gap: "12px" }}>
              <button
               onClick={handleStart}
@@ -242,7 +238,6 @@ export default function NavigationView() {
               도착
             </button>
           </div>
-        )}
       </div>
 
       <BottomNav />

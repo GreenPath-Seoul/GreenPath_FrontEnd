@@ -114,7 +114,7 @@ export const login = async (id: string, pw: string): Promise<AuthResponse> => {
         username: "test1234",
         name: "테스터"
       },
-      token: "mock-jwt-token"
+      accessToken: "mock-jwt-token"
     };
   }
 
@@ -135,7 +135,7 @@ export const signup = async (id: string, pw: string, name: string): Promise<Auth
       username: id,
       name: name
     },
-    token: "mock-new-jwt-token"
+    accessToken: "mock-new-jwt-token"
   };
 };
 

@@ -1,11 +1,90 @@
+import axios from "axios";
 import { API_CONFIG } from "../config";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "../types";
-import { AuthApi, Configuration } from "@/generated/api";
+import { AuthApi, Configuration, MemberPreferenceApi, CourseApi, MemberApi } from "@/generated/api";
 
-const authApi = new AuthApi(new Configuration({
+const axiosInstance = axios.create();
+
+// 401 에러(인증 만료) 처리 인터셉터
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("Unauthorized! Redirecting to login...");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+const config = new Configuration({
   basePath: API_CONFIG.BASE_URL,
   accessToken: () => localStorage.getItem("accessToken") || "",
-}));
+});
+
+const authApi = new AuthApi(config, undefined, axiosInstance);
+const preferenceApi = new MemberPreferenceApi(config, undefined, axiosInstance);
+const courseApi = new CourseApi(config, undefined, axiosInstance);
+const memberApi = new MemberApi(config, undefined, axiosInstance);
+
+export const completeExploration = async (data: any) => {
+  try {
+    const response = await courseApi.completeExploration(data);
+    return response.data.data; // CourseRecordResultResponse
+  } catch (error: any) {
+    console.error("Course completion failed:", error);
+    throw error;
+  }
+};
+
+export const getMyPage = async () => {
+  try {
+    const response = await memberApi.getMyPage();
+    return response.data.data; // MyPageResponse
+  } catch (error: any) {
+    console.error("Getting MyPage failed:", error);
+    throw error;
+  }
+};
+
+export const recommendCourse = async (data: any) => {
+  try {
+    const response = await courseApi.recommend(data);
+    return response.data.data; // CourseResponse
+  } catch (error: any) {
+    console.error("Course recommendation failed:", error);
+    throw error;
+  }
+};
+
+export const getCourseStopInfo = async (courseId: number, stopOrder: number) => {
+  try {
+    const response = await courseApi.getCourseStopInfo(courseId, stopOrder);
+    return response.data.data; // CourseExploreResponse
+  } catch (error: any) {
+    console.error("Getting stop info failed:", error);
+    throw error;
+  }
+};
+
+export const savePreference = async (data: any) => {
+  try {
+    const response = await preferenceApi.savePreference(data);
+    return {
+      success: response.data.status === 200 || response.data.status === undefined,
+      message: response.data.message,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "취향 저장에 실패했습니다.",
+    };
+  }
+};
 
 export const getCourseRecommendation = async (mood: string, time: string, difficulty: string): Promise<CourseRecommendation> => {
   const params = new URLSearchParams({ mood, time, difficulty });

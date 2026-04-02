@@ -38,28 +38,30 @@ export default function NavigationView() {
     }
   }, []);
 
-  const handleStart = async () => {
-    if (!stopInfo) return;
+  const handleStart = () => {
+  if (!stopInfo) return;
 
-    // 현재 위치 가져오기
-    let curLat = 37.5665;
-    let curLng = 126.9780;
+  const name = encodeURIComponent(stopInfo.name);
 
-    if (navigator.geolocation) {
-      try {
-        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-        curLat = pos.coords.latitude;
-        curLng = pos.coords.longitude;
-      } catch (e) {
-        console.warn("Location access denied");
-      }
-    }
+  const curLat = 37.5665;
+  const curLng = 126.9780;
 
-    const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${stopInfo.name},${stopInfo.latitude},${stopInfo.longitude}`;
-    window.open(kakaoMapUrl, "_blank");
-    
+  const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
+
+  window.location.href = kakaoMapUrl;
+
+  if (!localStorage.getItem("explorationStartTime")) {
+    const startTime = new Date().toISOString().split('.')[0] + 'Z';
+    localStorage.setItem("explorationStartTime", startTime);
+
+    const totalDist = courseData?.summary?.distanceKm ?? 0;
+    localStorage.setItem("explorationDistance", String(totalDist));
+
+    localStorage.removeItem("visitedSpotIds");
+  }
+
+  setHasViewedGuidance(true);
+
     // 탐방 시작 정보 저장
     if (!localStorage.getItem("explorationStartTime")) {
       const startTime = new Date().toISOString().split('.')[0] + 'Z';

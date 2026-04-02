@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bike, ArrowLeft } from "lucide-react";
-import { signup } from "@/lib/api";
+import { signup, login } from "@/lib/api";
 
 export default function SignupView() {
   const router = useRouter();
@@ -26,8 +26,26 @@ export default function SignupView() {
       const res = await signup(id, pw, name);
       if (res.success) {
         alert(res.message);
-        localStorage.setItem("isLoggedIn", "true");
-        router.push("/");
+        
+        // 자동 로그인 처리
+        try {
+          // 백엔드 DB 반영 대기용 딜레이
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          
+          const loginRes = await login(id, pw);
+          if (loginRes.success) {
+            localStorage.setItem("isLoggedIn", "true");
+            if (loginRes.accessToken) localStorage.setItem("accessToken", loginRes.accessToken);
+            if (loginRes.refreshToken) localStorage.setItem("refreshToken", loginRes.refreshToken);
+            window.location.replace("/");
+          } else {
+            alert("자동 로그인에 실패했습니다. 로그인 페이지로 이동합니다.");
+            window.location.replace("/login");
+          }
+        } catch(loginErr) {
+          alert("자동 로그인 중 오류가 발생했습니다. 로그인 페이지로 이동합니다.");
+          window.location.replace("/login");
+        }
       } else {
         alert(res.message);
       }
@@ -63,19 +81,24 @@ export default function SignupView() {
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
           <input 
-            type="text" 
-            placeholder="아이디" 
+            type="email" 
+            placeholder="아이디 (이메일)" 
             value={id}
             onChange={(e) => setId(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
-          <input 
-            type="password" 
-            placeholder="비밀번호" 
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
-          />
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <input 
+              type="password" 
+              placeholder="비밀번호" 
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
+            />
+            <p style={{ color: "#6b7280", fontSize: "12px", marginLeft: "4px" }}>
+              * 영문, 숫자, 특수문자를 조합하여 8자 이상 입력해주세요.
+            </p>
+          </div>
           <input 
             type="password" 
             placeholder="비밀번호 확인" 

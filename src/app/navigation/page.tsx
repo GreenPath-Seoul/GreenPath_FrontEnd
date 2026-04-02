@@ -14,7 +14,10 @@ export default function NavigationView() {
   const [hasViewedGuidance, setHasViewedGuidance] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentStopOrder, setCurrentStopOrder] = useState(1);
-
+const [currentLocation, setCurrentLocation] = useState({
+  lat: 37.5665,
+  lng: 126.9780,
+});
   useEffect(() => {
     const courseId = localStorage.getItem("currentCourseId");
     const stopOrder = localStorage.getItem("currentStopOrder") || "1";
@@ -36,6 +39,20 @@ export default function NavigationView() {
     } else {
       setLoading(false);
     }
+
+     if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCurrentLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+      },
+      () => {
+        console.warn("위치 권한 거부됨");
+      }
+    );
+  }
   }, []);
 
   const handleStart = () => {
@@ -43,30 +60,9 @@ export default function NavigationView() {
 
   const name = encodeURIComponent(stopInfo.name);
 
-  let curLat = 37.5665;
-  let curLng = 126.9780;
+  const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${currentLocation.lat},${currentLocation.lng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        curLat = pos.coords.latitude;
-        curLng = pos.coords.longitude;
-
-        const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
-
-        window.location.href = kakaoMapUrl;
-      },
-      () => {
-        const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
-
-        window.location.href = kakaoMapUrl;
-      }
-    );
-  } else {
-    const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${curLat},${curLng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
-
-    window.location.href = kakaoMapUrl;
-  }
+  window.location.href = kakaoMapUrl;
 
   if (!localStorage.getItem("explorationStartTime")) {
     const startTime = new Date().toISOString().split('.')[0] + 'Z';

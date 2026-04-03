@@ -188,10 +188,11 @@ export default function ArrivalView() {
         }}
       >
       {/* Header Image */}
-      <div style={{ position: "relative", height: "35vh", width: "100%" }}>
+      <div style={{ position: "relative", height: "35vh", width: "100%", backgroundColor: "#e5e7eb" }}>
         <img 
           src={stopInfo.imageUrl || "https://images.unsplash.com/photo-1542159676-47b2ae60baf4?auto=format&fit=crop&q=80&w=600"} 
           alt={stopInfo.name} 
+          loading="lazy"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
         <button 

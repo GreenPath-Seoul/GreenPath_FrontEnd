@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Map as MapIcon, RotateCcw, User } from "lucide-react";
+import { Home, Map as MapIcon, Navigation2, User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -31,18 +31,18 @@ export default function BottomNav() {
         <span>홈</span>
       </button>
       <button 
-        className={`nav-item ${pathname === "/course" || pathname === "/exploration" ? "active" : ""}`}
+        className={`nav-item ${pathname.startsWith("/course") ? "active" : ""}`}
         onClick={() => handleNav("/course", true)}
       >
         <MapIcon size={24} />
-        <span>탐방</span>
+        <span>코스</span>
       </button>
       <button 
-        className={`nav-item ${pathname === "/record" ? "active" : ""}`}
-        onClick={() => handleNav("/record", true)}
+        className={`nav-item ${pathname.startsWith("/navigation") || pathname.startsWith("/arrival") ? "active" : ""}`}
+        onClick={() => handleNav("/navigation", true)}
       >
-        <RotateCcw size={24} />
-        <span>기록</span>
+        <Navigation2 size={24} />
+        <span>탐방</span>
       </button>
       <button 
         className={`nav-item ${pathname === "/my" ? "active" : ""}`}

@@ -28,7 +28,9 @@ export const getCourseRecommendation = async (mood: string, time: string, diffic
     ? mockApi.getCourseRecommendation(mood, time, difficulty)
     : realApi.getCourseRecommendation(mood, time, difficulty);
 };
-
+export const getCourseDetail = async (courseId: number) => {
+  return realApi.getCourseDetail(courseId);
+};
 export const getNavigationInfo = async (courseId: string): Promise<NavigationInfo> => {
   return API_CONFIG.USE_MOCK 
     ? mockApi.getNavigationInfo(courseId)

@@ -87,8 +87,41 @@ const [currentLocation, setCurrentLocation] = useState({
 
   if (!stopInfo || !courseData) {
     return (
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div>탐방 정보를 찾을 수 없습니다.</div>
+      <div 
+        style={{ 
+          background: "#f3f4f6", 
+          display: "flex", 
+          justifyContent: "center", 
+          minHeight: "100vh" 
+        }}
+      >
+        <div 
+          style={{ 
+            width: "100%", 
+            maxWidth: "430px", 
+            background: "#eef8f3", 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            justifyContent: "center",
+            padding: "20px"
+          }}
+        >
+          <div style={{ fontSize: "60px", marginBottom: "20px" }}>🚲</div>
+          <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "10px" }}>진행 중인 탐방이 없습니다</h2>
+          <p style={{ color: "#6b7280", textAlign: "center", marginBottom: "30px" }}>
+            새로운 코스를 추천받아<br/>탐방을 시작해보세요!
+          </p>
+          <button 
+            className="btn-primary" 
+            onClick={() => router.push("/")}
+          >
+            홈으로 가기
+          </button>
+          <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: "430px" }}>
+            <BottomNav />
+          </div>
+        </div>
       </div>
     );
   }
@@ -99,7 +132,25 @@ const [currentLocation, setCurrentLocation] = useState({
   const progressPercent = Math.min(Math.round((currentStopOrder / (courseData.stops?.length || 1)) * 100), 100);
 
   return (
-    <div className="container" style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#ffffff" }}>
+    <div
+      style={{
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "100vh"
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+          background: "#ffffff",
+          minHeight: "100vh",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
       {/* Top Progress Bar Area */}
       <div style={{ padding: "20px 20px 10px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
@@ -237,6 +288,7 @@ const [currentLocation, setCurrentLocation] = useState({
       </div>
 
       <BottomNav />
+      </div>
     </div>
   );
 }

@@ -203,7 +203,7 @@ export default function ArrivalView() {
         </button>
       </div>
 
-      <div style={{ flex: 1, padding: "32px 24px", display: "flex", flexDirection: "column", backgroundColor: "white" }}>
+      <div style={{ flex: 1, padding: "32px 24px 80px 24px", display: "flex", flexDirection: "column", backgroundColor: "white" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#111827", marginBottom: "16px" }}>{stopInfo.name}</h2>
           <p style={{ fontSize: "15px", color: "#4b5563", lineHeight: "1.6" }}>

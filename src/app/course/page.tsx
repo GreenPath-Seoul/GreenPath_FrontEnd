@@ -90,7 +90,7 @@ export default function CourseListView() {
         {/* 리스트 */}
         <div
           style={{
-            padding: "0 20px",
+            padding: "0 20px 100px 20px",
             display: "flex",
             flexDirection: "column",
             gap: "16px"

@@ -141,7 +141,25 @@ export default function ArrivalView() {
   }
 
   return (
-    <div className="container" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div
+      style={{
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "100vh"
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+          background: "#ffffff",
+          minHeight: "100vh",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
       {/* Header Image */}
       <div style={{ position: "relative", height: "35vh", width: "100%" }}>
         <img 
@@ -194,6 +212,7 @@ export default function ArrivalView() {
       </div>
 
       <BottomNav />
+      </div>
     </div>
   );
 }

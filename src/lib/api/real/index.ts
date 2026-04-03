@@ -1,7 +1,10 @@
+
+
 import axios from "axios";
 import { API_CONFIG } from "../config";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "../types";
-import { AuthApi, Configuration, MemberPreferenceApi, CourseApi, MemberApi } from "@/generated/api";
+import { AuthApi, Configuration, MemberPreferenceApi, CourseApi, MemberApi } from "@/api";
+import { CourseResponse } from "@/api";
 
 const axiosInstance = axios.create();
 
@@ -51,14 +54,20 @@ export const getMyPage = async () => {
   }
 };
 
-export const recommendCourse = async (data: any) => {
+export const recommendCourse = async (
+  data: any
+): Promise<CourseResponse[]> => {
   try {
     const response = await courseApi.recommend(data);
-    return response.data.data; // CourseResponse
-  } catch (error: any) {
+  return (response.data.data ?? []) as CourseResponse[];  } catch (error) {
     console.error("Course recommendation failed:", error);
     throw error;
   }
+};
+
+export const getCourseDetail = async (courseId: number) => {
+  const res = await courseApi.getCourseDetail(courseId);
+  return res.data.data;
 };
 
 export const getCourseStopInfo = async (courseId: number, stopOrder: number) => {

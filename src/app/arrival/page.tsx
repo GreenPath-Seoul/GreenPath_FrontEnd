@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Square, Volume2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
 import { useEffect, useState } from "react";
@@ -13,6 +13,11 @@ export default function ArrivalView() {
   const [loading, setLoading] = useState(true);
   const [isLastStop, setIsLastStop] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  
+  // TTS & AI Story State
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showAiStory, setShowAiStory] = useState(false);
+  const aiStoryText = "TTS테스트입니다. 숨은한옥카페전통과 현대가 공존하는 휴식공간인데 이런씩으로 말하면 괜찮겠죠?";
 
   useEffect(() => {
     const courseId = localStorage.getItem("currentCourseId");
@@ -44,7 +49,31 @@ export default function ArrivalView() {
     } else {
       setLoading(false);
     }
+
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
   }, []);
+
+  const handleToggleTts = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      const utterance = new SpeechSynthesisUtterance(aiStoryText);
+      utterance.lang = "ko-KR";
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
+  };
 
   const handleFinishExploration = async () => {
     try {
@@ -54,7 +83,6 @@ export default function ArrivalView() {
       const rawStartTime = localStorage.getItem("explorationStartTime") || "";
       const distance = localStorage.getItem("explorationDistance");
       
-      // 밀리초를 제외한 ISO 문자열 생성
       const endTime = new Date().toISOString().split('.')[0] + 'Z';
       const formattedStartTime = rawStartTime.split('.')[0].replace('Z', '') + 'Z';
 
@@ -63,7 +91,6 @@ export default function ArrivalView() {
         return;
       }
 
-      // 최종 방문 목록 가져오기
       const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
       let visitedList: number[] = JSON.parse(visitedJson);
 
@@ -75,19 +102,9 @@ export default function ArrivalView() {
         visitedSpotIds: visitedList
       };
 
-      console.log("--- 탐방 시간 정보 확인 ---");
-      console.log("시작 시간 (startTime):", requestData.startTime, `(원래 값: ${rawStartTime})`);
-      console.log("종료 시간 (endTime):", requestData.endTime);
-      console.log("------------------------");
-      console.log(">>> [보내는 데이터] 전체 요청:", requestData);
-
       const res = await completeExploration(requestData);
-      
-      console.log("<<< [받은 데이터] 탐방 완료 결과:", res);
-
       localStorage.setItem("lastExplorationResult", JSON.stringify(res));
       
-      // 탐방 세션 초기화
       localStorage.removeItem("explorationStartTime");
       localStorage.removeItem("explorationDistance");
       localStorage.removeItem("visitedSpotIds");
@@ -95,9 +112,6 @@ export default function ArrivalView() {
       router.push("/record");
     } catch (error: any) {
       console.error("Failed to complete exploration:", error);
-      if (error.response?.data) {
-        console.error("Error response details:", error.response.data);
-      }
       router.push("/record");
     } finally {
       setFinishing(false);
@@ -105,7 +119,6 @@ export default function ArrivalView() {
   };
 
   const handleNext = () => {
-    // 현재 경유지 방문 기록
     if (stopInfo && stopInfo.id !== undefined) {
       const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
       let visitedList: number[] = JSON.parse(visitedJson);
@@ -126,7 +139,7 @@ export default function ArrivalView() {
 
   if (loading) {
     return (
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f3f4f6' }}>
         <div>Loading...</div>
       </div>
     );
@@ -134,14 +147,32 @@ export default function ArrivalView() {
 
   if (!stopInfo) {
     return (
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f3f4f6' }}>
         <div>정보를 불러올 수 없습니다.</div>
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div
+      style={{
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "100vh"
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+          background: "#ffffff",
+          minHeight: "100vh",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
       {/* Header Image */}
       <div style={{ position: "relative", height: "35vh", width: "100%" }}>
         <img 
@@ -165,12 +196,42 @@ export default function ArrivalView() {
           </p>
         </div>
 
-        {/* AI Story Button */}
-        <div style={{ backgroundColor: "white", borderRadius: "16px", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", border: "1px solid #e5e7eb", marginBottom: "24px", cursor: "pointer" }}>
-          <span style={{ fontSize: "16px", fontWeight: "600", color: "#111827" }}>AI 스토리 듣기</span>
-          <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#59d58d", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Play size={20} color="white" style={{ marginLeft: "4px" }} />
+        {/* AI Story Section (Expandable) */}
+        <div 
+          onClick={() => setShowAiStory(!showAiStory)}
+          style={{ 
+            backgroundColor: "#f9fafb", 
+            borderRadius: "16px", 
+            padding: "20px", 
+            display: "flex", 
+            flexDirection: "column",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.03)", 
+            border: "1px solid #e5e7eb", 
+            marginBottom: "24px", 
+            cursor: "pointer",
+            transition: "all 0.3s ease"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <Volume2 size={20} color="#59d58d" />
+              <span style={{ fontSize: "16px", fontWeight: "700", color: "#111827" }}>AI 장소 가이드</span>
+            </div>
+            <div 
+              onClick={handleToggleTts}
+              style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: isSpeaking ? "#ef4444" : "#59d58d", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}
+            >
+              {isSpeaking ? <Square size={16} color="white" fill="white" /> : <Play size={18} color="white" fill="white" style={{ marginLeft: "2px" }} />}
+            </div>
           </div>
+          
+          {showAiStory && (
+            <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #e5e7eb", animation: "fadeIn 0.3s ease" }}>
+              <p style={{ fontSize: "14px", color: "#4b5563", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
+                {aiStoryText}
+              </p>
+            </div>
+          )}
         </div>
 
         <button 
@@ -194,6 +255,14 @@ export default function ArrivalView() {
       </div>
 
       <BottomNav />
+      </div>
+      
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

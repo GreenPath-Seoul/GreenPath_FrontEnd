@@ -78,12 +78,11 @@ export default function HomeView() {
         longitude
       });
       
-      if (response && response.courseId) {
-        localStorage.setItem("currentCourseId", response.courseId.toString());
-        localStorage.setItem("currentCourseData", JSON.stringify(response));
-        localStorage.setItem("currentCourseStopsCount", (response.stops?.length || 0).toString());
-        localStorage.setItem("currentStopOrder", "1");
-      }
+      // 👉 배열 저장
+    if (response && response.length > 0) {
+      localStorage.setItem("recommendedCourses", JSON.stringify(response));
+    }
+
       
       router.push("/course");
     } catch (error) {

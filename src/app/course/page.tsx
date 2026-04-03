@@ -1,115 +1,140 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronRight, Leaf, MapPin, Clock, ArrowUpRight } from "lucide-react";
+import { MapPin, Clock, Leaf } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import { useEffect, useState } from "react";
-import { getCourseRecommendation } from "@/lib/api";
-import { CourseRecommendation } from "@/lib/api/types";
 
-export default function CourseView() {
+export default function CourseListView() {
   const router = useRouter();
-
-  const [data, setData] = useState<any>(null);
+  const [courses, setCourses] = useState<any[]>([]);
 
   useEffect(() => {
-    // 세션에 저장된 추천 데이터가 있는지 확인
-    const savedCourse = localStorage.getItem("currentCourseData");
-    if (savedCourse) {
-      setData(JSON.parse(savedCourse));
-    } else {
-      // 데이터가 없으면 기본 목업 호출 (기존 코드 유지)
-      getCourseRecommendation("조용한 곳", "1시간", "초급").then(setData);
+    const saved = localStorage.getItem("recommendedCourses");
+    if (saved) {
+      setCourses(JSON.parse(saved));
     }
   }, []);
 
-  if (!data) {
+  if (!courses.length) {
     return (
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div>Loading...</div>
+      <div 
+        style={{ 
+          background: "#f3f4f6", 
+          display: "flex", 
+          justifyContent: "center", 
+          minHeight: "100vh" 
+        }}
+      >
+        <div 
+          style={{ 
+            width: "100%", 
+            maxWidth: "430px", 
+            background: "#eef8f3", 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            justifyContent: "center",
+            padding: "20px"
+          }}
+        >
+          <div style={{ fontSize: "60px", marginBottom: "20px" }}>🗺️</div>
+          <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "10px" }}>추천받은 코스가 없습니다</h2>
+          <p style={{ color: "#6b7280", textAlign: "center", marginBottom: "30px" }}>
+            취향에 맞는 코스를 추천받아 보세요!
+          </p>
+          <button 
+            className="btn-primary" 
+            onClick={() => router.push("/")}
+          >
+            추천 받으러 가기
+          </button>
+          <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: "430px" }}>
+            <BottomNav />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ backgroundColor: "#eef8f3" }}>
-      <div className="content">
-        <div style={{ padding: "32px 20px" }}>
-          <h1 style={{ fontSize: "22px", fontWeight: "700", marginBottom: "8px", color: "black", letterSpacing: "-0.5px" }}>
-            {data.title}
+    // ✅ 바깥 (회색 배경 + 가운데 정렬)
+    <div
+      style={{
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "100vh"
+      }}
+    >
+      {/* ✅ 모바일 화면 */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+          background: "#eef8f3",
+          minHeight: "100vh",
+          position: "relative"
+        }}
+      >
+        {/* 상단 */}
+        <div style={{ padding: "24px" }}>
+          <h1 style={{ fontSize: "22px", fontWeight: "700" }}>
+            추천 코스
           </h1>
-          <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "24px" }}>
-            {data.subtitle}
+          <p style={{ color: "#6b7280" }}>
+            AI가 선별한 당신만의 따릉이 여행
           </p>
-
-          <div style={{ backgroundColor: "white", borderRadius: "16px", padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.03)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <MapPin size={20} color="#59d58d" />
-              <div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>총 거리</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.distanceKm || data.distance || 0}km</div>
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Clock size={20} color="#59d58d" />
-              <div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>소요 시간</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.durationMinutes ? `${data.summary.durationMinutes}분` : data.duration}</div>
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <ArrowUpRight size={20} color="#59d58d" />
-              <div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>난이도</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.difficulty || data.difficulty}</div>
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Leaf size={20} color="#59d58d" />
-              <div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>탄소 절감</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{data.summary?.carbonReductionKg || data.carbonReduction || 0}kg</div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div style={{ padding: "0 20px 20px", borderTopLeftRadius: "24px", borderTopRightRadius: "24px", backgroundColor: "white", minHeight: "50vh" }}>
-          <div style={{ fontSize: "16px", fontWeight: "600", marginTop: "24px", marginBottom: "16px", color: "black" }}>경유지</div>
-          
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {(data.stops || []).map((stop: any, idx: number) => (
-              <div key={idx} style={{ display: "flex", alignItems: "center", padding: "12px", border: "1px solid #e5e7eb", borderRadius: "12px", cursor: "pointer", transition: "all 0.2s" }}>
-                <div style={{ width: "64px", height: "64px", borderRadius: "8px", overflow: "hidden", marginRight: "12px" }}>
-                  <img src={stop.imageUrl || stop.imgHover} alt={stop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                    <div style={{ width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#59d58d", color: "white", fontSize: "11px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>
-                      {stop.order || stop.id}
-                    </div>
-                    <span style={{ fontSize: "15px", fontWeight: "600", color: "#111827" }}>{stop.name}</span>
-                  </div>
-                  <div style={{ fontSize: "13px", color: "#6b7280", marginBottom: "4px" }}>{stop.description || stop.desc}</div>
-                  <div style={{ fontSize: "12px", color: "#9ca3af" }}>{stop.stayMinutes ? `체류 시간: ${stop.stayMinutes}분` : stop.time}</div>
-                </div>
-                <ChevronRight size={20} color="#d1d5db" />
-              </div>
-            ))}
-          </div>
-          
-          <div style={{ marginTop: "32px", marginBottom: "20px" }}>
-            <button
-              className="btn-primary"
-              onClick={() => router.push("/navigation")}
+        {/* 리스트 */}
+        <div
+          style={{
+            padding: "0 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px"
+          }}
+        >
+          {courses.map((course, idx) => (
+            <div
+              key={idx}
+              onClick={() => {
+                localStorage.setItem("selectedCourse", JSON.stringify(course));
+                router.push(`/course/${course.courseId || idx}`);
+              }}
+              style={{
+                background: "white",
+                borderRadius: "16px",
+                overflow: "hidden",
+                cursor: "pointer"
+              }}
             >
-              이 코스로 이동하기
-            </button>
-          </div>
+              <img
+                src={course.imageUrl || "https://picsum.photos/600/300"}
+                style={{ width: "100%", height: "180px", objectFit: "cover" }}
+              />
+
+              <div style={{ padding: "16px" }}>
+                <h2 style={{ fontSize: "18px", fontWeight: "600" }}>
+                  {course.title}
+                </h2>
+
+                <div style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
+                  <span><MapPin size={14}/> {course.summary?.distanceKm}km</span>
+                  <span><Clock size={14}/> {course.summary?.durationMinutes}분</span>
+                  <span><Leaf size={14}/> {course.summary?.carbonReductionKg}kg</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 하단 네비 */}
+        <div style={{ position: "sticky", bottom: 0 }}>
+          <BottomNav />
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 }

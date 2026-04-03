@@ -59,19 +59,33 @@ export default function ArrivalView() {
 
   const handleToggleTts = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    if (typeof window === "undefined" || !window.speechSynthesis) {
+      alert("이 브라우저는 음성 안내를 지원하지 않습니다.");
+      return;
+    }
 
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     } else {
+      // 모바일 브라우저의 경우 가끔 일시정지 상태로 시작하는 경우가 있어 강제로 resume 호출
+      window.speechSynthesis.resume();
+      
       const utterance = new SpeechSynthesisUtterance(aiStoryText);
       utterance.lang = "ko-KR";
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
+      utterance.rate = 1.0; // 속도 (0.1 ~ 10)
+      utterance.pitch = 1.0; // 피치 (0 ~ 2)
       
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = (event) => {
+        console.error("TTS Error:", event);
+        setIsSpeaking(false);
+      };
+      
+      // 기존에 말하고 있는 것이 있다면 취소하고 새로 시작
+      window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
-      setIsSpeaking(true);
     }
   };
 

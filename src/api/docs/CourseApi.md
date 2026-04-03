@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost:8080*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**completeExploration**](#completeexploration) | **POST** /api/v1/courses/complete | 탐방 완료 처리|
+|[**getCourseDetail**](#getcoursedetail) | **GET** /api/v1/courses/{courseId} | 코스 상세 정보 조회|
 |[**getCourseStopInfo**](#getcoursestopinfo) | **GET** /api/v1/courses/{courseId}/stops/{stopOrder} | 경유지 상세 정보 조회|
 |[**recommend**](#recommend) | **POST** /api/v1/courses/recommend | 맞춤 코스 추천|
 
@@ -50,6 +51,57 @@ const { status, data } = await apiInstance.completeExploration(
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: */*
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getCourseDetail**
+> ApiResponseCourseResponse getCourseDetail()
+
+선택한 코스에 대한 정보를 반환합니다.
+
+### Example
+
+```typescript
+import {
+    CourseApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new CourseApi(configuration);
+
+let courseId: number; // (default to undefined)
+
+const { status, data } = await apiInstance.getCourseDetail(
+    courseId
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **courseId** | [**number**] |  | defaults to undefined|
+
+
+### Return type
+
+**ApiResponseCourseResponse**
+
+### Authorization
+
+[jwtAuth](../README.md#jwtAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: */*
 
 
@@ -115,7 +167,7 @@ const { status, data } = await apiInstance.getCourseStopInfo(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **recommend**
-> ApiResponseCourseResponse recommend()
+> ApiResponseListCourseResponse recommend()
 
 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
 
@@ -147,7 +199,7 @@ const { status, data } = await apiInstance.recommend(
 
 ### Return type
 
-**ApiResponseCourseResponse**
+**ApiResponseListCourseResponse**
 
 ### Authorization
 

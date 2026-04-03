@@ -318,6 +318,11 @@ export default function RecordView() {
           </div>
         </div>
 
+        {/* 네비게이션 가림 방지 여백 */}
+        <div style={{ height: "100px" }} />
+      </div>
+
+      <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: "430px", zIndex: 100 }}>
         <BottomNav />
       </div>
     </div>

@@ -24,27 +24,21 @@ export default function SignupView() {
 
     try {
       const res = await signup(id, pw, name);
-      if (res.success) {
+      if (res.message === "회원가입이 완료되었습니다.") {
         alert(res.message);
-        
-        // 자동 로그인 처리
+        localStorage.setItem("isLoggedIn", "true");
         try {
-          // 백엔드 DB 반영 대기용 딜레이
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          
-          const loginRes = await login(id, pw);
-          if (loginRes.success) {
+          const res = await login(id, pw);
+          if (res.success) {
             localStorage.setItem("isLoggedIn", "true");
-            if (loginRes.accessToken) localStorage.setItem("accessToken", loginRes.accessToken);
-            if (loginRes.refreshToken) localStorage.setItem("refreshToken", loginRes.refreshToken);
-            window.location.replace("/");
+            if (res.accessToken) localStorage.setItem("accessToken", res.accessToken);
+            if (res.refreshToken) localStorage.setItem("refreshToken", res.refreshToken);
+            router.push("/");
           } else {
-            alert("자동 로그인에 실패했습니다. 로그인 페이지로 이동합니다.");
-            window.location.replace("/login");
+            alert(res.message);
           }
-        } catch(loginErr) {
-          alert("자동 로그인 중 오류가 발생했습니다. 로그인 페이지로 이동합니다.");
-          window.location.replace("/login");
+        } catch (e) {
+          alert("로그인 중 오류가 발생했습니다.");
         }
       } else {
         alert(res.message);
@@ -57,11 +51,12 @@ export default function SignupView() {
   return (
     <div className="container" style={{ padding: "0 20px" }}>
       <div style={{ padding: "20px 0", position: "relative" }}>
-        <button 
+        <button
           onClick={() => router.back()}
           style={{ position: "absolute", left: 0, top: "20px", display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px" }}
         >
           <ArrowLeft size={24} color="#111827" />
+
         </button>
       </div>
 
@@ -73,9 +68,9 @@ export default function SignupView() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "32px" }}>
-          <input 
-            type="text" 
-            placeholder="이름" 
+          <input
+            type="text"
+            placeholder="이름"
             value={name}
             onChange={(e) => setName(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
@@ -108,8 +103,8 @@ export default function SignupView() {
           />
         </div>
 
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           onClick={handleSignup}
           style={{ padding: "16px", marginBottom: "24px" }}
         >

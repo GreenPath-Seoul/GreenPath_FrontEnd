@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bike, ArrowLeft } from "lucide-react";
-import { signup } from "@/lib/api";
+import { signup, login } from "@/lib/api";
 
 export default function SignupView() {
   const router = useRouter();
@@ -24,10 +24,22 @@ export default function SignupView() {
 
     try {
       const res = await signup(id, pw, name);
-      if (res.message ==="회원가입이 완료되었습니다.") {
+      if (res.message === "회원가입이 완료되었습니다.") {
         alert(res.message);
-          localStorage.setItem("isLoggedIn", "true");
-          router.push("/");
+        localStorage.setItem("isLoggedIn", "true");
+        try {
+          const res = await login(id, pw);
+          if (res.success) {
+            localStorage.setItem("isLoggedIn", "true");
+            if (res.accessToken) localStorage.setItem("accessToken", res.accessToken);
+            if (res.refreshToken) localStorage.setItem("refreshToken", res.refreshToken);
+            router.push("/");
+          } else {
+            alert(res.message);
+          }
+        } catch (e) {
+          alert("로그인 중 오류가 발생했습니다.");
+        }
       } else {
         alert(res.message);
       }

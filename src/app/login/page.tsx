@@ -23,7 +23,7 @@ export default function LoginView() {
         localStorage.setItem("isLoggedIn", "true");
         if (res.accessToken) localStorage.setItem("accessToken", res.accessToken);
         if (res.refreshToken) localStorage.setItem("refreshToken", res.refreshToken);
-        router.push("/");
+        window.location.replace("/");
       } else {
         alert(res.message);
       }

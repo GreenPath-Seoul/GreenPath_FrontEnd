@@ -75,23 +75,28 @@ export default function SignupView() {
             onChange={(e) => setName(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
-          <input
-            type="text"
-            placeholder="아이디"
+          <input 
+            type="email" 
+            placeholder="아이디 (이메일)" 
             value={id}
             onChange={(e) => setId(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
           />
-          <input
-            type="password"
-            placeholder="비밀번호"
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
-          />
-          <input
-            type="password"
-            placeholder="비밀번호 확인"
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <input 
+              type="password" 
+              placeholder="비밀번호" 
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
+            />
+            <p style={{ color: "#6b7280", fontSize: "12px", marginLeft: "4px" }}>
+              * 영문, 숫자, 특수문자를 조합하여 8자 이상 입력해주세요.
+            </p>
+          </div>
+          <input 
+            type="password" 
+            placeholder="비밀번호 확인" 
             value={pwConfirm}
             onChange={(e) => setPwConfirm(e.target.value)}
             style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}

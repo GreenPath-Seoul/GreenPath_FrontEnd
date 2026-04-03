@@ -24,10 +24,10 @@ export default function SignupView() {
 
     try {
       const res = await signup(id, pw, name);
-      if (res.success) {
+      if (res.message ==="회원가입이 완료되었습니다.") {
         alert(res.message);
-        localStorage.setItem("isLoggedIn", "true");
-        router.push("/");
+          localStorage.setItem("isLoggedIn", "true");
+          router.push("/");
       } else {
         alert(res.message);
       }

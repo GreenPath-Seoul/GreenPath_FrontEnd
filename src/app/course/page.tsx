@@ -110,10 +110,14 @@ export default function CourseListView() {
                 cursor: "pointer"
               }}
             >
-              <img
-                src={course.imageUrl || "https://picsum.photos/600/300"}
-                style={{ width: "100%", height: "180px", objectFit: "cover" }}
-              />
+              <div style={{ width: "100%", height: "180px", backgroundColor: "#e5e7eb", position: "relative" }}>
+                <img
+                  src={course.imageUrl || "https://picsum.photos/600/300"}
+                  loading="lazy"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  alt={course.title}
+                />
+              </div>
 
               <div style={{ padding: "16px" }}>
                 <h2 style={{ fontSize: "18px", fontWeight: "600" }}>

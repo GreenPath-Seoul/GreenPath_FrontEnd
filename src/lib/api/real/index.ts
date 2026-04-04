@@ -12,7 +12,11 @@ const axiosInstance = axios.create();
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // 특정 public API 경로(/api/auth/check-email, /api/auth/login, /api/auth/sign-up)는 리다이렉트 제외
+    const excludedPaths = ["/api/auth/check-email", "/api/auth/login", "/api/auth/sign-up"];
+    const isExcluded = error.config?.url && excludedPaths.some(path => error.config.url.includes(path));
+
+    if (error.status === 401 && !isExcluded) {
       console.warn("Unauthorized! Redirecting to login...");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
@@ -133,6 +137,23 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     return {
       success: false,
       message: error.response?.data?.message || "로그인에 실패했습니다.",
+    };
+  }
+};
+
+export const checkEmail = async (email: string): Promise<AuthResponse> => {
+  try {
+    const response = await authApi.checkEmail(email);
+    const apiRes = response.data;
+    
+    return {
+      success: apiRes.status === 200 || apiRes.status === undefined,
+      message: apiRes.message || "사용 가능한 이메일입니다.",
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "이미 사용 중인 이메일이거나 확인에 실패했습니다.",
     };
   }
 };

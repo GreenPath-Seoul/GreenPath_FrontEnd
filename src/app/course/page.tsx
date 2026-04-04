@@ -134,8 +134,11 @@ export default function CourseListView() {
           ))}
         </div>
 
+        {/* 하단 네비게이션 가림 방지 여백 */}
+        <div style={{ height: "100px" }} />
+
         {/* 하단 네비 */}
-        <div style={{ position: "sticky", bottom: 0 }}>
+        <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: "430px", zIndex: 100 }}>
           <BottomNav />
         </div>
       </div>

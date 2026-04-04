@@ -57,6 +57,10 @@ export const signup = async (id: string, pw: string, name: string): Promise<Auth
   return realApi.signup(id, pw, name);
 };
 
+export const checkEmail = async (email: string): Promise<AuthResponse> => {
+  return realApi.checkEmail(email);
+};
+
 export const logout = async (): Promise<AuthResponse> => {
   return realApi.logout();
 };

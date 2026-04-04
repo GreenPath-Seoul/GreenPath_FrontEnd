@@ -267,9 +267,14 @@ export default function ArrivalView() {
             {finishing ? "처리 중..." : "탐방 종료"}
           </button>
         )}
+        
+        {/* 네비게이션 가림 방지 여백 */}
+        <div style={{ height: "100px" }} />
       </div>
 
-      <BottomNav />
+      <div style={{ position: "fixed", bottom: 0, width: "100%", maxWidth: "430px", zIndex: 100 }}>
+        <BottomNav />
+      </div>
       </div>
       
       <style jsx>{`

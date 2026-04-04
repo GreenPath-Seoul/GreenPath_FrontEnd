@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **courseId** | **number** |  | [optional] [default to undefined]
+**code** | **string** |  | [optional] [default to undefined]
 **title** | **string** |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
 **summary** | [**CourseSummary**](CourseSummary.md) |  | [optional] [default to undefined]
@@ -20,6 +21,7 @@ import { CourseResponse } from './api';
 
 const instance: CourseResponse = {
     courseId,
+    code,
     title,
     description,
     summary,

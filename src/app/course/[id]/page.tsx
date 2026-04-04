@@ -84,7 +84,7 @@ export default function CourseDetailPage() {
                     {idx + 1}. {stop.name}
                   </div>
                   <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                    {stop.description}
+                    {stop.summary || "문화유산 탐방 장소"}
                   </div>
                 </div>
               ))}

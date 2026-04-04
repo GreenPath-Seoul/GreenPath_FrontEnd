@@ -60,8 +60,7 @@ const [currentLocation, setCurrentLocation] = useState({
 
   const name = encodeURIComponent(stopInfo.name);
 
-  const kakaoMapUrl = `https://map.kakao.com/link/from/현재위치,${currentLocation.lat},${currentLocation.lng}/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
-
+  const kakaoMapUrl = `https://map.kakao.com/link/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
   window.location.href = kakaoMapUrl;
 
   if (!localStorage.getItem("explorationStartTime")) {
@@ -230,7 +229,7 @@ const [currentLocation, setCurrentLocation] = useState({
                       )}
                     </div>
                     <div style={{ fontSize: "13px", color: "#9ca3af", marginBottom: isCurrent ? "8px" : "0" }}>
-                      {index === 0 ? "광화문 따릉이 대여소" : (stop.description || "문화유산 탐방 장소")}
+                      {index === 0 ? "광화문 따릉이 대여소" : (stop.summary || "문화유산 탐방 장소")}
                     </div>
                     
                     {isCurrent && (

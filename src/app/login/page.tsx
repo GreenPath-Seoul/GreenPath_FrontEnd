@@ -10,10 +10,19 @@ export default function LoginView() {
   const router = useRouter();
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleLogin = async () => {
     if (!id || !pw) {
-      alert("아이디와 비밀번호를 입력해주세요.");
+      alert("이메일과 비밀번호를 입력해주세요.");
+      return;
+    }
+
+    if (!emailRegex.test(id)) {
+      setEmailError("올바른 이메일 형식이 아닙니다.");
+      alert("올바른 이메일 형식이 아닙니다.");
       return;
     }
 
@@ -33,35 +42,74 @@ export default function LoginView() {
   };
 
   return (
-    <div className="container" style={{ padding: "0 20px" }}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+    <div className="container" style={{ padding: "0 20px", maxWidth: "480px", margin: "0 auto" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100vh" }}>
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <Bike size={48} color="#59d58d" style={{ margin: "0 auto" }} />
-          <h1 style={{ fontSize: "24px", marginTop: "16px", color: "black" }}>Seoul Renaissance Ride</h1>
+          <div style={{ 
+            width: "64px", 
+            height: "64px", 
+            backgroundColor: "#ecfdf5", 
+            borderRadius: "20px", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center",
+            margin: "0 auto",
+            marginBottom: "16px"
+          }}>
+            <Bike size={32} color="#10b981" />
+          </div>
+          <h1 style={{ fontSize: "24px", fontWeight: "700", color: "#111827", letterSpacing: "-0.5px" }}>Seoul Renaissance Ride</h1>
           <p style={{ color: "#6b7280", marginTop: "8px", fontSize: "14px" }}>탐방을 위해 로그인을 해주세요</p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
-          <input 
-            type="text" 
-            placeholder="아이디" 
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
-          />
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <input 
+              type="email" 
+              placeholder="이메일 (아이디)" 
+              value={id}
+              onChange={(e) => {
+                setId(e.target.value);
+                if (emailError) setEmailError("");
+              }}
+              style={{ 
+                padding: "16px", 
+                borderRadius: "14px", 
+                border: `1px solid ${emailError ? "#ef4444" : "#e5e7eb"}`, 
+                fontSize: "16px",
+                backgroundColor: "#f9fafb"
+              }}
+            />
+            {emailError && (
+              <p style={{ color: "#ef4444", fontSize: "12px", marginLeft: "4px" }}>{emailError}</p>
+            )}
+          </div>
           <input 
             type="password" 
             placeholder="비밀번호" 
             value={pw}
             onChange={(e) => setPw(e.target.value)}
-            style={{ padding: "16px", borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: "16px" }}
+            style={{ 
+              padding: "16px", 
+              borderRadius: "14px", 
+              border: "1px solid #e5e7eb", 
+              fontSize: "16px",
+              backgroundColor: "#f9fafb"
+            }}
           />
         </div>
 
         <button 
           className="btn-primary" 
           onClick={handleLogin}
-          style={{ marginBottom: "24px", padding: "16px" }}
+          style={{ 
+            padding: "18px", 
+            borderRadius: "16px",
+            fontSize: "16px",
+            fontWeight: "700",
+            marginBottom: "24px",
+            boxShadow: "0 4px 6px -1px rgba(16, 185, 129, 0.2)"
+          }}
         >
           로그인
         </button>

@@ -5,8 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**code** | **string** |  | [optional] [default to undefined]
 **order** | **number** |  | [optional] [default to undefined]
 **name** | **string** |  | [optional] [default to undefined]
+**summary** | **string** |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
 **stayMinutes** | **number** |  | [optional] [default to undefined]
 **latitude** | **number** |  | [optional] [default to undefined]
@@ -19,8 +21,10 @@ Name | Type | Description | Notes
 import { CourseStop } from './api';
 
 const instance: CourseStop = {
+    code,
     order,
     name,
+    summary,
     description,
     stayMinutes,
     latitude,

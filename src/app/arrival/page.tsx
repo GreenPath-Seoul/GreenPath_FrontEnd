@@ -17,7 +17,6 @@ export default function ArrivalView() {
   // TTS & AI Story State
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showAiStory, setShowAiStory] = useState(false);
-  const aiStoryText = "TTS테스트입니다. 숨은한옥카페전통과 현대가 공존하는 휴식공간인데 이런씩으로 말하면 괜찮겠죠?";
 
   useEffect(() => {
     const courseId = localStorage.getItem("currentCourseId");
@@ -71,7 +70,7 @@ export default function ArrivalView() {
       // 모바일 브라우저의 경우 가끔 일시정지 상태로 시작하는 경우가 있어 강제로 resume 호출
       window.speechSynthesis.resume();
       
-      const utterance = new SpeechSynthesisUtterance(aiStoryText);
+      const utterance = new SpeechSynthesisUtterance(stopInfo?.description || "이 장소에 대한 상세 설명이 제공되지 않았습니다.");
       utterance.lang = "ko-KR";
       utterance.rate = 1.0; // 속도 (0.1 ~ 10)
       utterance.pitch = 1.0; // 피치 (0 ~ 2)
@@ -207,7 +206,7 @@ export default function ArrivalView() {
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#111827", marginBottom: "16px" }}>{stopInfo.name}</h2>
           <p style={{ fontSize: "15px", color: "#4b5563", lineHeight: "1.6" }}>
-            {stopInfo.description || "이 장소에 대한 상세 설명이 제공되지 않았습니다."}
+            {stopInfo.summary || "이 장소에 대한 요약이 제공되지 않았습니다."}
           </p>
         </div>
 
@@ -243,7 +242,7 @@ export default function ArrivalView() {
           {showAiStory && (
             <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #e5e7eb", animation: "fadeIn 0.3s ease" }}>
               <p style={{ fontSize: "14px", color: "#4b5563", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
-                {aiStoryText}
+                {stopInfo.description || "이 장소에 대한 상세 설명이 제공되지 않았습니다."}
               </p>
             </div>
           )}

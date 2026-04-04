@@ -94,8 +94,11 @@ export interface CourseCompleteRequest {
 }
 export interface CourseExploreResponse {
     'id'?: number;
+    'code'?: string;
     'courseId'?: number;
+    'courseCode'?: string;
     'name'?: string;
+    'summary'?: string;
     'description'?: string;
     'latitude'?: number;
     'longitude'?: number;
@@ -148,6 +151,7 @@ export type CourseRequestLocationEnum = typeof CourseRequestLocationEnum[keyof t
 
 export interface CourseResponse {
     'courseId'?: number;
+    'code'?: string;
     'title'?: string;
     'description'?: string;
     'summary'?: CourseSummary;
@@ -156,8 +160,10 @@ export interface CourseResponse {
     'createdAt'?: string;
 }
 export interface CourseStop {
+    'code'?: string;
     'order'?: number;
     'name'?: string;
+    'summary'?: string;
     'description'?: string;
     'stayMinutes'?: number;
     'latitude'?: number;

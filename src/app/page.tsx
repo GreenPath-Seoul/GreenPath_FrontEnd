@@ -170,16 +170,15 @@ export default function HomeView() {
             ))}
           </div>
         </div>
-
-        <div className="fixed-bottom">
-          <button
-            className="btn-primary"
-            onClick={handleRecommend}
-            disabled={isLoading}
-          >
-            {isLoading ? "코스 분석 중..." : "AI 코스 추천 받기"}
-          </button>
-        </div>
+      </div>
+      <div className="fixed-bottom">
+        <button
+          className="btn-primary"
+          onClick={handleRecommend}
+          disabled={isLoading}
+        >
+          {isLoading ? "코스 분석 중..." : "AI 코스 추천 받기"}
+        </button>
       </div>
 
       <BottomNav />

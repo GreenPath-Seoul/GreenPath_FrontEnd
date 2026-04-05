@@ -93,16 +93,23 @@ export default function ArrivalView() {
       setFinishing(true);
       
       const courseId = localStorage.getItem("currentCourseId");
-      const rawStartTime = localStorage.getItem("explorationStartTime") || "";
+      const rawStartTime = localStorage.getItem("explorationStartTime");
       const distance = localStorage.getItem("explorationDistance");
       
-      const endTime = new Date().toISOString().split('.')[0] + 'Z';
-      const formattedStartTime = rawStartTime.split('.')[0].replace('Z', '') + 'Z';
+      // 밀리초를 제외한 ISO 8601 형식 생성 (YYYY-MM-DDTHH:mm:ssZ)
+      const now = new Date();
+      const endTime = now.toISOString().split('.')[0] + 'Z';
 
       if (!courseId || !rawStartTime) {
+        console.error("Missing required exploration data:", { courseId, rawStartTime });
         router.push("/record");
         return;
       }
+
+      // 저장된 시작 시간이 이미 포맷팅되어 있으므로 그대로 사용하거나 재포맷
+      const formattedStartTime = rawStartTime.includes('.') 
+        ? rawStartTime.split('.')[0] + 'Z' 
+        : rawStartTime;
 
       const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
       let visitedList: number[] = JSON.parse(visitedJson);

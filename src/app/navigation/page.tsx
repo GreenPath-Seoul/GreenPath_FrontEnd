@@ -63,16 +63,6 @@ const [currentLocation, setCurrentLocation] = useState({
   const kakaoMapUrl = `https://map.kakao.com/link/to/${name},${stopInfo.latitude},${stopInfo.longitude}`;
   window.location.href = kakaoMapUrl;
 
-  if (!localStorage.getItem("explorationStartTime")) {
-    const startTime = new Date().toISOString().split('.')[0] + 'Z';
-    localStorage.setItem("explorationStartTime", startTime);
-
-    const totalDist = courseData?.summary?.distanceKm ?? 0;
-    localStorage.setItem("explorationDistance", String(totalDist));
-
-    localStorage.removeItem("visitedSpotIds");
-  }
-
   setHasViewedGuidance(true);
 };
 

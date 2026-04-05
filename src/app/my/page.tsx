@@ -120,7 +120,12 @@ export default function MyView() {
           <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#374151", marginBottom: "12px" }}>최근 기록</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {(data.recentRecords || []).map((record: any, idx: number) => (
-              <div key={idx} className="card" style={{ padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div 
+                key={idx} 
+                className="card" 
+                style={{ padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
+                onClick={() => router.push(`/record?recordId=${record.recordId}`)}
+              >
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                   <span style={{ fontSize: "14px", fontWeight: "600", color: "#111827" }}>{record.title}</span>
                   <span style={{ fontSize: "12px", color: "#6b7280" }}>{record.date}</span>

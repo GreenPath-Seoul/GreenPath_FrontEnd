@@ -99,6 +99,16 @@ export const savePreference = async (data: any) => {
   }
 };
 
+export const getExploreRecordResult = async (recordId: number) => {
+  try {
+    const response = await courseApi.getExploreRecordResult(recordId);
+    return response.data.data; // CourseRecordResultResponse
+  } catch (error: any) {
+    console.error("Getting record result failed:", error);
+    throw error;
+  }
+};
+
 export const getCourseRecommendation = async (mood: string, time: string, difficulty: string): Promise<CourseRecommendation> => {
   const params = new URLSearchParams({ mood, time, difficulty });
   const res = await fetch(`${API_CONFIG.BASE_URL}/api/course-recommendation?${params.toString()}`);

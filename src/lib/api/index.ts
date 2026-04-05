@@ -43,6 +43,10 @@ export const getExplorationRecord = async (recordId: string): Promise<Exploratio
     : realApi.getExplorationRecord(recordId);
 };
 
+export const getExploreRecordResult = async (recordId: number) => {
+  return realApi.getExploreRecordResult(recordId);
+};
+
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   return API_CONFIG.USE_MOCK 
     ? mockApi.getUserProfile(userId)

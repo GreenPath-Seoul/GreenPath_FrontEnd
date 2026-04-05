@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **recordId** | **number** |  | [optional] [default to undefined]
+**courseTitle** | **string** |  | [optional] [default to undefined]
 **summary** | [**Summary**](Summary.md) |  | [optional] [default to undefined]
 **co2** | [**CO2**](CO2.md) |  | [optional] [default to undefined]
 **reward** | [**Reward**](Reward.md) |  | [optional] [default to undefined]
@@ -18,6 +19,7 @@ import { CourseRecordResultResponse } from './api';
 
 const instance: CourseRecordResultResponse = {
     recordId,
+    courseTitle,
     summary,
     co2,
     reward,

@@ -2,9 +2,10 @@
 
 import { Trophy, MapPin, Clock, Star, Leaf, Landmark, Bike, Camera, MapIcon, Download } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { toPng } from "html-to-image";
+import { getExploreRecordResult } from "@/lib/api";
 
 const getIcon = (code?: string) => {
   switch (code) {
@@ -19,32 +20,65 @@ const getIcon = (code?: string) => {
 };
 
 export default function RecordView() {
+  return (
+    <Suspense fallback={<div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div>Loading...</div></div>}>
+      <RecordContent />
+    </Suspense>
+  );
+}
+
+function RecordContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const recordId = searchParams.get("recordId");
+  
   const [data, setData] = useState<any>(null);
   const [courseName, setCourseName] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const captureRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const result = localStorage.getItem("lastExplorationResult");
-    if (result) {
-      setData(JSON.parse(result));
-    } else {
-      router.push("/");
-    }
-
-    const savedCourse = localStorage.getItem("currentCourseData");
-    if (savedCourse) {
+    const fetchData = async () => {
       try {
-        const parsed = JSON.parse(savedCourse);
-        setCourseName(parsed.title || "나의 멋진 탐방 코스");
-      } catch (e) {
-        setCourseName("나의 멋진 탐방 코스");
+        if (recordId) {
+          // recordId가 있으면 API로 서버에서 조회
+          const result = await getExploreRecordResult(Number(recordId));
+          if (!result) throw new Error("Record not found");
+          
+          setData(result);
+          setCourseName(result.courseTitle || "나의 멋진 탐방 코스");
+        } else {
+          // 없으면 마지막 탐방 결과(localStorage) 조회
+          const result = localStorage.getItem("lastExplorationResult");
+          if (result) {
+            setData(JSON.parse(result));
+          } else {
+            router.push("/");
+          }
+
+          const savedCourse = localStorage.getItem("currentCourseData");
+          if (savedCourse) {
+            try {
+              const parsed = JSON.parse(savedCourse);
+              setCourseName(parsed.title || "나의 멋진 탐방 코스");
+            } catch (e) {
+              setCourseName("나의 멋진 탐방 코스");
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load record:", error);
+        router.push("/");
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [router]);
+    };
+
+    fetchData();
+  }, [router, recordId]);
 
   const handleGeneratePreview = async () => {
     if (!captureRef.current) return;
@@ -74,7 +108,7 @@ export default function RecordView() {
     setShowPreview(false);
   };
 
-  if (!data) {
+  if (loading || !data) {
     return (
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div>Loading...</div>

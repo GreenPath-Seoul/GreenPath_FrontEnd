@@ -106,6 +106,7 @@ export interface CourseExploreResponse {
 }
 export interface CourseRecordResultResponse {
     'recordId'?: number;
+    'courseTitle'?: string;
     'summary'?: Summary;
     'co2'?: CO2;
     'reward'?: Reward;
@@ -772,6 +773,44 @@ export const CourseApiAxiosParamCreator = function (configuration?: Configuratio
             };
         },
         /**
+         * 기록 ID를 통해 과거 탐방 결과를 다시 조회합니다.
+         * @summary 탐방 기록 상세 조회
+         * @param {number} recordId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExploreRecordResult: async (recordId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'recordId' is not null or undefined
+            assertParamExists('getExploreRecordResult', 'recordId', recordId)
+            const localVarPath = `/api/v1/courses/records/{recordId}`
+                .replace(`{${"recordId"}}`, encodeURIComponent(String(recordId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
          * @summary 맞춤 코스 추천
          * @param {CourseRequest} [courseRequest] 
@@ -858,6 +897,19 @@ export const CourseApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * 기록 ID를 통해 과거 탐방 결과를 다시 조회합니다.
+         * @summary 탐방 기록 상세 조회
+         * @param {number} recordId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExploreRecordResult(recordId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseCourseRecordResultResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExploreRecordResult(recordId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CourseApi.getExploreRecordResult']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
          * @summary 맞춤 코스 추천
          * @param {CourseRequest} [courseRequest] 
@@ -911,6 +963,16 @@ export const CourseApiFactory = function (configuration?: Configuration, basePat
             return localVarFp.getCourseStopInfo(courseId, stopOrder, options).then((request) => request(axios, basePath));
         },
         /**
+         * 기록 ID를 통해 과거 탐방 결과를 다시 조회합니다.
+         * @summary 탐방 기록 상세 조회
+         * @param {number} recordId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExploreRecordResult(recordId: number, options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseCourseRecordResultResponse> {
+            return localVarFp.getExploreRecordResult(recordId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
          * @summary 맞춤 코스 추천
          * @param {CourseRequest} [courseRequest] 
@@ -959,6 +1021,17 @@ export class CourseApi extends BaseAPI {
      */
     public getCourseStopInfo(courseId: number, stopOrder: number, options?: RawAxiosRequestConfig) {
         return CourseApiFp(this.configuration).getCourseStopInfo(courseId, stopOrder, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 기록 ID를 통해 과거 탐방 결과를 다시 조회합니다.
+     * @summary 탐방 기록 상세 조회
+     * @param {number} recordId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getExploreRecordResult(recordId: number, options?: RawAxiosRequestConfig) {
+        return CourseApiFp(this.configuration).getExploreRecordResult(recordId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

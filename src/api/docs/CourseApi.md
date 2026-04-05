@@ -7,6 +7,7 @@ All URIs are relative to *http://localhost:8080*
 |[**completeExploration**](#completeexploration) | **POST** /api/v1/courses/complete | 탐방 완료 처리|
 |[**getCourseDetail**](#getcoursedetail) | **GET** /api/v1/courses/{courseId} | 코스 상세 정보 조회|
 |[**getCourseStopInfo**](#getcoursestopinfo) | **GET** /api/v1/courses/{courseId}/stops/{stopOrder} | 경유지 상세 정보 조회|
+|[**getExploreRecordResult**](#getexplorerecordresult) | **GET** /api/v1/courses/records/{recordId} | 탐방 기록 상세 조회|
 |[**recommend**](#recommend) | **POST** /api/v1/courses/recommend | 맞춤 코스 추천|
 
 # **completeExploration**
@@ -148,6 +149,57 @@ const { status, data } = await apiInstance.getCourseStopInfo(
 ### Return type
 
 **ApiResponseCourseExploreResponse**
+
+### Authorization
+
+[jwtAuth](../README.md#jwtAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: */*
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getExploreRecordResult**
+> ApiResponseCourseRecordResultResponse getExploreRecordResult()
+
+기록 ID를 통해 과거 탐방 결과를 다시 조회합니다.
+
+### Example
+
+```typescript
+import {
+    CourseApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new CourseApi(configuration);
+
+let recordId: number; // (default to undefined)
+
+const { status, data } = await apiInstance.getExploreRecordResult(
+    recordId
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **recordId** | [**number**] |  | defaults to undefined|
+
+
+### Return type
+
+**ApiResponseCourseRecordResultResponse**
 
 ### Authorization
 

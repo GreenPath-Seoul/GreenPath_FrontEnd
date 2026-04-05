@@ -97,6 +97,14 @@ export default function CourseDetailPage() {
                 localStorage.setItem("currentCourseId", String(courseId));
                 localStorage.setItem("currentStopOrder", "1");
                 localStorage.setItem("currentCourseData", JSON.stringify(data));
+                localStorage.setItem("currentCourseStopsCount", String(data.stops?.length || 0));
+
+                // 탐방 시작 시간 및 거리 저장 (사용자 요청에 따라 무조건 갱신)
+                const startTime = new Date().toISOString().split('.')[0] + 'Z';
+                localStorage.setItem("explorationStartTime", startTime);
+                localStorage.setItem("explorationDistance", String(data.summary?.distanceKm || 0));
+                localStorage.removeItem("visitedSpotIds");
+
                 router.push("/navigation");
               }}
             >

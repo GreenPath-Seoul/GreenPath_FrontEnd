@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **location** | **string** |  | [optional] [default to undefined]
 **latitude** | **number** |  | [optional] [default to undefined]
 **longitude** | **number** |  | [optional] [default to undefined]
+**preferenceText** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -24,6 +25,7 @@ const instance: CourseRequest = {
     location,
     latitude,
     longitude,
+    preferenceText,
 };
 ```
 

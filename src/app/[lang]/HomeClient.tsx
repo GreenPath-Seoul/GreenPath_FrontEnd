@@ -40,6 +40,7 @@ export default function HomeClient({ dictionary, lang }: Props) {
   const [time, setTime] = useState("1시간");
   const [difficulty, setDifficulty] = useState("초급 (평지)");
   const [locationChoice, setLocationChoice] = useState("현재 위치 주변");
+  const [preferenceText, setPreferenceText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const moods = ["조용한 곳", "사진 명소", "역사 중심", "힙한 골목"];
@@ -80,7 +81,8 @@ export default function HomeClient({ dictionary, lang }: Props) {
         level: levelMap[difficulty],
         location: locationMap[locationChoice],
         latitude,
-        longitude
+        longitude,
+        preferenceText: preferenceText.trim()
       });
       
       if (response && response.length > 0) {
@@ -199,6 +201,16 @@ export default function HomeClient({ dictionary, lang }: Props) {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="section" style={{ paddingBottom: "40px" }}>
+          <div className="section-title">{dictionary.main.preference}</div>
+          <textarea
+            className="textarea-input"
+            value={preferenceText}
+            onChange={(e) => setPreferenceText(e.target.value)}
+            placeholder={dictionary.main.preferencePlaceholder}
+          />
         </div>
       </div>
       <div className="fixed-bottom">

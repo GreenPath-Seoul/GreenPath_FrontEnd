@@ -29,7 +29,9 @@
     "locations": {
       "현재 위치 주변": "Around my location",
       "상관없음": "Any"
-    }
+    },
+    "preference": "Tell us more",
+    "preferencePlaceholder": "e.g., Hanok cafe tour, sunset course, etc."
   },
   "nav": {
     "home": "Home",

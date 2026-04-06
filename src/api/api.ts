@@ -119,6 +119,7 @@ export interface CourseRequest {
     'location'?: CourseRequestLocationEnum;
     'latitude'?: number;
     'longitude'?: number;
+    'preferenceText'?: string;
 }
 
 export const CourseRequestMoodEnum = {

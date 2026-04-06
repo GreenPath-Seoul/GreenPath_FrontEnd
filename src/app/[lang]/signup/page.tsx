@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Bike, ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
 import { signup, login, checkEmail } from "@/lib/api";
 
 export default function SignupView() {
   const router = useRouter();
+  const params = useParams();
+  const lang = (params.lang as string) || "ko";
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
@@ -121,12 +123,12 @@ export default function SignupView() {
             localStorage.setItem("isLoggedIn", "true");
             if (loginRes.accessToken) localStorage.setItem("accessToken", loginRes.accessToken);
             if (loginRes.refreshToken) localStorage.setItem("refreshToken", loginRes.refreshToken);
-            router.push("/");
+            router.push(`/${lang}`);
           } else {
-            router.push("/login");
+            router.push(`/${lang}/login`);
           }
         } catch (e) {
-          router.push("/login");
+          router.push(`/${lang}/login`);
         }
       } else {
         alert(res.message);

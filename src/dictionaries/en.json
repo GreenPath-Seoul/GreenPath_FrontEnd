@@ -1,0 +1,40 @@
+{
+  "main": {
+    "title": "Seoul Renaissance Ride",
+    "subtitle": "AI-recommended cultural heritage bike tours in Seoul",
+    "question": "What kind of trip do you want today?",
+    "mood": "Mood",
+    "time": "Duration",
+    "difficulty": "Difficulty",
+    "location": "Location",
+    "recommendBtn": "Get AI recommendations",
+    "analyzing": "Analyzing courses...",
+    "loginAlert": "Please log in to receive AI course recommendations.",
+    "moods": {
+      "조용한 곳": "Quiet place",
+      "사진 명소": "Photo spots",
+      "역사 중심": "Historical spots",
+      "힙한 골목": "Trendy alleys"
+    },
+    "times": {
+      "1시간": "1 hour",
+      "2시간": "2 hours",
+      "반나절": "Half day"
+    },
+    "levels": {
+      "초급 (평지)": "Beginner (flat)",
+      "중급": "Intermediate",
+      "상관없음": "Any"
+    },
+    "locations": {
+      "현재 위치 주변": "Around my location",
+      "상관없음": "Any"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "course": "Course",
+    "search": "Explore",
+    "my": "My"
+  }
+}

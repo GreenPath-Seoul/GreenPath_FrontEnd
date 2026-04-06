@@ -1,14 +1,43 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Play, Square, Volume2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
 import { useEffect, useState } from "react";
 import { getCourseStopInfo, completeExploration } from "@/lib/api";
 
+const text = {
+  ko: {
+    noSummary: "이 장소에 대한 요약이 제공되지 않았습니다.",
+    noDescription: "이 장소에 대한 상세 설명이 제공되지 않았습니다.",
+    aiGuide: "AI 장소 가이드",
+    processing: "처리 중...",
+    completeExplore: "탐방 완료",
+    nextStop: "다음 경유지 안내",
+    endExplore: "탐방 종료",
+    ttsNotSupported: "이 브라우저는 음성 안내를 지원하지 않습니다.",
+    cannotLoad: "정보를 불러올 수 없습니다.",
+  },
+  en: {
+    noSummary: "No summary available for this place.",
+    noDescription: "No detailed description available for this place.",
+    aiGuide: "AI Place Guide",
+    processing: "Processing...",
+    completeExplore: "Complete Exploration",
+    nextStop: "Next Stop Guide",
+    endExplore: "End Exploration",
+    ttsNotSupported: "This browser does not support voice guidance.",
+    cannotLoad: "Unable to load information.",
+  }
+};
+
 export default function ArrivalView() {
   const router = useRouter();
+  const params = useParams();
+  const lang = (params.lang as string) || "ko";
+  const t = text[lang as keyof typeof text] || text.ko;
+
   const [stopInfo, setStopInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isLastStop, setIsLastStop] = useState(false);
@@ -31,7 +60,6 @@ export default function ArrivalView() {
             setLoading(false);
             setIsLastStop(Number(stopOrder) >= Number(totalStopsCount));
 
-            // 실시간 방문 기록 업데이트
             if (res.id !== undefined) {
               const visitedJson = localStorage.getItem("visitedSpotIds") || "[]";
               let visitedList: number[] = JSON.parse(visitedJson);
@@ -59,7 +87,7 @@ export default function ArrivalView() {
   const handleToggleTts = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (typeof window === "undefined" || !window.speechSynthesis) {
-      alert("이 브라우저는 음성 안내를 지원하지 않습니다.");
+      alert(t.ttsNotSupported);
       return;
     }
 
@@ -67,13 +95,12 @@ export default function ArrivalView() {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     } else {
-      // 모바일 브라우저의 경우 가끔 일시정지 상태로 시작하는 경우가 있어 강제로 resume 호출
       window.speechSynthesis.resume();
       
-      const utterance = new SpeechSynthesisUtterance(stopInfo?.description || "이 장소에 대한 상세 설명이 제공되지 않았습니다.");
-      utterance.lang = "ko-KR";
-      utterance.rate = 1.0; // 속도 (0.1 ~ 10)
-      utterance.pitch = 1.0; // 피치 (0 ~ 2)
+      const utterance = new SpeechSynthesisUtterance(stopInfo?.description || t.noDescription);
+      utterance.lang = lang === "en" ? "en-US" : "ko-KR";
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
       
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
@@ -82,7 +109,6 @@ export default function ArrivalView() {
         setIsSpeaking(false);
       };
       
-      // 기존에 말하고 있는 것이 있다면 취소하고 새로 시작
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
     }
@@ -96,17 +122,15 @@ export default function ArrivalView() {
       const rawStartTime = localStorage.getItem("explorationStartTime");
       const distance = localStorage.getItem("explorationDistance");
       
-      // 밀리초를 제외한 ISO 8601 형식 생성 (YYYY-MM-DDTHH:mm:ssZ)
       const now = new Date();
       const endTime = now.toISOString().split('.')[0] + 'Z';
 
       if (!courseId || !rawStartTime) {
         console.error("Missing required exploration data:", { courseId, rawStartTime });
-        router.push("/record");
+        router.push(`/${lang}/record`);
         return;
       }
 
-      // 저장된 시작 시간이 이미 포맷팅되어 있으므로 그대로 사용하거나 재포맷
       const formattedStartTime = rawStartTime.includes('.') 
         ? rawStartTime.split('.')[0] + 'Z' 
         : rawStartTime;
@@ -129,10 +153,10 @@ export default function ArrivalView() {
       localStorage.removeItem("explorationDistance");
       localStorage.removeItem("visitedSpotIds");
       
-      router.push("/record");
+      router.push(`/${lang}/record`);
     } catch (error: any) {
       console.error("Failed to complete exploration:", error);
-      router.push("/record");
+      router.push(`/${lang}/record`);
     } finally {
       setFinishing(false);
     }
@@ -153,7 +177,7 @@ export default function ArrivalView() {
     } else {
       const currentOrder = Number(localStorage.getItem("currentStopOrder") || "1");
       localStorage.setItem("currentStopOrder", (currentOrder + 1).toString());
-      router.push("/navigation");
+      router.push(`/${lang}/navigation`);
     }
   };
 
@@ -168,7 +192,7 @@ export default function ArrivalView() {
   if (!stopInfo) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f3f4f6' }}>
-        <div>정보를 불러올 수 없습니다.</div>
+        <div>{t.cannotLoad}</div>
       </div>
     );
   }
@@ -213,7 +237,7 @@ export default function ArrivalView() {
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#111827", marginBottom: "16px" }}>{stopInfo.name}</h2>
           <p style={{ fontSize: "15px", color: "#4b5563", lineHeight: "1.6" }}>
-            {stopInfo.summary || "이 장소에 대한 요약이 제공되지 않았습니다."}
+            {stopInfo.summary || t.noSummary}
           </p>
         </div>
 
@@ -236,7 +260,7 @@ export default function ArrivalView() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <Volume2 size={20} color="#59d58d" />
-              <span style={{ fontSize: "16px", fontWeight: "700", color: "#111827" }}>AI 장소 가이드</span>
+              <span style={{ fontSize: "16px", fontWeight: "700", color: "#111827" }}>{t.aiGuide}</span>
             </div>
             <div 
               onClick={handleToggleTts}
@@ -249,7 +273,7 @@ export default function ArrivalView() {
           {showAiStory && (
             <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #e5e7eb", animation: "fadeIn 0.3s ease" }}>
               <p style={{ fontSize: "14px", color: "#4b5563", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
-                {stopInfo.description || "이 장소에 대한 상세 설명이 제공되지 않았습니다."}
+                {stopInfo.description || t.noDescription}
               </p>
             </div>
           )}
@@ -261,7 +285,7 @@ export default function ArrivalView() {
           onClick={handleNext}
           disabled={finishing}
         >
-          {finishing ? "처리 중..." : (isLastStop ? "탐방 완료" : "다음 경유지 안내")}
+          {finishing ? t.processing : (isLastStop ? t.completeExplore : t.nextStop)}
         </button>
 
         {!isLastStop && (
@@ -270,11 +294,10 @@ export default function ArrivalView() {
             onClick={handleFinishExploration}
             disabled={finishing}
           >
-            {finishing ? "처리 중..." : "탐방 종료"}
+            {finishing ? t.processing : t.endExplore}
           </button>
         )}
         
-        {/* 네비게이션 가림 방지 여백 */}
         <div style={{ height: "100px" }} />
       </div>
 

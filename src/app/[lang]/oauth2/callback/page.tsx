@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { Suspense } from "react";
 
 function OAuth2CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const lang = (params.lang as string) || "ko";
 
   useEffect(() => {
     const accessToken = searchParams.get("accessToken");
@@ -15,7 +17,7 @@ function OAuth2CallbackContent() {
 
     if (error) {
       alert(`로그인 실패: ${error}`);
-      router.push("/login");
+      router.push(`/${lang}/login`);
       return;
     }
 
@@ -26,13 +28,13 @@ function OAuth2CallbackContent() {
         localStorage.setItem("refreshToken", refreshToken);
       }
       // Redirect to home page after successful login
-      router.push("/");
+      router.push(`/${lang}`);
     } else {
       // If no token, something went wrong, go back to login
       // alert("로그인 중 오류가 발생했습니다.");
-      // router.push("/login");
+      // router.push(`/${lang}/login`);
     }
-  }, [router, searchParams]);
+  }, [router, searchParams, lang]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>

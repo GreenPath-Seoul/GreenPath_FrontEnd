@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Bike, MapPin } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Bike, MapPin, Languages } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
-import { savePreference, recommendCourse } from "@/lib/api";
+import { recommendCourse } from "@/lib/api";
+import Link from "next/link";
+
+interface Props {
+  dictionary: any;
+  lang: string;
+}
 
 const moodMap: Record<string, string> = {
   "조용한 곳": "QUIET",
@@ -27,8 +33,9 @@ const locationMap: Record<string, string> = {
   "상관없음": "ANY",
 };
 
-export default function HomeView() {
+export default function HomeClient({ dictionary, lang }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const [mood, setMood] = useState("조용한 곳");
   const [time, setTime] = useState("1시간");
   const [difficulty, setDifficulty] = useState("초급 (평지)");
@@ -41,19 +48,17 @@ export default function HomeView() {
   const locations = ["현재 위치 주변", "상관없음"];
 
   const handleRecommend = async () => {
-    // 로그인 체크 강화
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     const hasToken = !!localStorage.getItem("accessToken");
 
     if (!isLoggedIn || !hasToken) {
-      alert("AI 코스 추천을 받으려면 로그인이 필요합니다.");
-      router.push("/login");
+      alert(dictionary.main.loginAlert);
+      router.push(`/${lang}/login`);
       return;
     }
 
     setIsLoading(true);
     try {
-      // 위치 정보 가져오기 (비동기)
       let latitude = 37.5665;
       let longitude = 126.9780;
 
@@ -78,39 +83,64 @@ export default function HomeView() {
         longitude
       });
       
-      // 👉 배열 저장
-    if (response && response.length > 0) {
-      localStorage.setItem("recommendedCourses", JSON.stringify(response));
-    }
-
+      if (response && response.length > 0) {
+        localStorage.setItem("recommendedCourses", JSON.stringify(response));
+      }
       
-      router.push("/course");
+      router.push(`/${lang}/course`);
     } catch (error) {
       console.error("Failed to save preference:", error);
-      // 실패해도 일단 코스 페이지로 이동하도록 처리 (백엔드 확인용)
-      router.push("/course");
+      router.push(`/${lang}/course`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const redirectedPathname = (locale: string) => {
+    if (!pathname) return "/";
+    const segments = pathname.split("/");
+    segments[1] = locale;
+    return segments.join("/");
+  };
+
   return (
     <div className="container">
       <div className="content">
-        <header className="header">
-          <div className="header-title">
-            <Bike size={24} color="#59d58d" />
-            <span style={{ color: "black", letterSpacing: "-0.5px" }}>Seoul Renaissance Ride</span>
+        <header className="header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="header-left">
+            <div className="header-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Bike size={24} color="#59d58d" />
+              <span style={{ color: "black", letterSpacing: "-0.5px", fontWeight: "bold" }}>{dictionary.main.title}</span>
+            </div>
+            <div className="header-subtitle" style={{ fontSize: "13px", color: "#666" }}>{dictionary.main.subtitle}</div>
           </div>
-          <div className="header-subtitle">AI가 추천하는 서울 문화재 따릉이 여행</div>
+          
+          <div className="header-right">
+            <div className="locale-switcher" style={{ display: "flex", gap: "8px", alignItems: "center", background: "#f5f5f5", padding: "4px 12px", borderRadius: "20px" }}>
+              <Languages size={16} color="#666" />
+              <Link 
+                href={redirectedPathname("ko")} 
+                style={{ fontSize: "12px", fontWeight: lang === "ko" ? "bold" : "normal", color: lang === "ko" ? "#59d58d" : "#999", textDecoration: "none" }}
+              >
+                KO
+              </Link>
+              <span style={{ color: "#ddd", fontSize: "12px" }}>|</span>
+              <Link 
+                href={redirectedPathname("en")} 
+                style={{ fontSize: "12px", fontWeight: lang === "en" ? "bold" : "normal", color: lang === "en" ? "#59d58d" : "#999", textDecoration: "none" }}
+              >
+                EN
+              </Link>
+            </div>
+          </div>
         </header>
 
         <div className="section" style={{ marginTop: "16px" }}>
           <div style={{ fontSize: "18px", fontWeight: "600", marginBottom: "24px", color: "black" }}>
-            오늘 어떤 여행을 하고 싶나요?
+            {dictionary.main.question}
           </div>
 
-          <div className="section-title">분위기</div>
+          <div className="section-title">{dictionary.main.mood}</div>
           <div className="chips-row">
             {moods.map((m) => (
               <button
@@ -118,14 +148,14 @@ export default function HomeView() {
                 className={`chip ${mood === m ? "active" : ""}`}
                 onClick={() => setMood(m)}
               >
-                {m}
+                {dictionary.main.moods[m]}
               </button>
             ))}
           </div>
         </div>
 
         <div className="section">
-          <div className="section-title">시간</div>
+          <div className="section-title">{dictionary.main.time}</div>
           <div className="chips-row">
             {times.map((t) => (
               <button
@@ -133,14 +163,14 @@ export default function HomeView() {
                 className={`chip ${time === t ? "active" : ""}`}
                 onClick={() => setTime(t)}
               >
-                {t}
+                {dictionary.main.times[t]}
               </button>
             ))}
           </div>
         </div>
 
         <div className="section">
-          <div className="section-title">난이도</div>
+          <div className="section-title">{dictionary.main.difficulty}</div>
           <div className="chips-row">
             {difficulties.map((d) => (
               <button
@@ -148,14 +178,14 @@ export default function HomeView() {
                 className={`chip ${difficulty === d ? "active" : ""}`}
                 onClick={() => setDifficulty(d)}
               >
-                {d}
+                {dictionary.main.levels[d]}
               </button>
             ))}
           </div>
         </div>
 
         <div className="section">
-          <div className="section-title">위치</div>
+          <div className="section-title">{dictionary.main.location}</div>
           <div className="chips-row">
             {locations.map((l) => (
               <button
@@ -165,7 +195,7 @@ export default function HomeView() {
                 style={{ display: "flex", alignItems: "center", gap: "4px" }}
               >
                 {l === "현재 위치 주변" && <MapPin size={14} />}
-                {l}
+                {dictionary.main.locations[l]}
               </button>
             ))}
           </div>
@@ -177,11 +207,11 @@ export default function HomeView() {
           onClick={handleRecommend}
           disabled={isLoading}
         >
-          {isLoading ? "코스 분석 중..." : "AI 코스 추천 받기"}
+          {isLoading ? dictionary.main.analyzing : dictionary.main.recommendBtn}
         </button>
       </div>
 
-      <BottomNav />
+      <BottomNav lang={lang} dictionary={dictionary.nav} />
     </div>
   );
 }

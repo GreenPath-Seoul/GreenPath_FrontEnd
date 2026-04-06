@@ -29,7 +29,9 @@
     "locations": {
       "현재 위치 주변": "현재 위치 주변",
       "상관없음": "상관없음"
-    }
+    },
+    "preference": "취향 자유 입력",
+    "preferencePlaceholder": "예: 한옥 카페 투어, 저녁 노을 코스 등"
   },
   "nav": {
     "home": "홈",

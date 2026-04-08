@@ -23,6 +23,14 @@ export const getMyPage = async () => {
   return realApi.getMyPage();
 };
 
+export const getCurrentWeather = async () => {
+  return realApi.getCurrentWeather();
+};
+
+export const getRandomCourses = async () => {
+  return realApi.getRandomCourses();
+};
+
 export const getCourseRecommendation = async (mood: string, time: string, difficulty: string): Promise<CourseRecommendation> => {
   return API_CONFIG.USE_MOCK 
     ? mockApi.getCourseRecommendation(mood, time, difficulty)

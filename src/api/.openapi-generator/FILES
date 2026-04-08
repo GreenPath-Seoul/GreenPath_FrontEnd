@@ -13,6 +13,7 @@ docs/ApiResponseMyPageResponse.md
 docs/ApiResponseString.md
 docs/ApiResponseTokenResponse.md
 docs/ApiResponseVoid.md
+docs/ApiResponseWeatherResponse.md
 docs/AuthApi.md
 docs/BadgeInfo.md
 docs/CO2.md
@@ -36,5 +37,7 @@ docs/Stats.md
 docs/Summary.md
 docs/TokenResponse.md
 docs/UserInfo.md
+docs/WeatherApi.md
+docs/WeatherResponse.md
 git_push.sh
 index.ts

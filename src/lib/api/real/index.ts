@@ -3,7 +3,7 @@
 import axios from "axios";
 import { API_CONFIG } from "../config";
 import { CourseRecommendation, NavigationInfo, ExplorationRecord, UserProfile, AuthResponse } from "../types";
-import { AuthApi, Configuration, MemberPreferenceApi, CourseApi, MemberApi } from "@/api";
+import { AuthApi, Configuration, MemberPreferenceApi, CourseApi, MemberApi, WeatherApi } from "@/api";
 import { CourseResponse } from "@/api";
 
 const axiosInstance = axios.create();
@@ -37,6 +37,7 @@ const authApi = new AuthApi(config, undefined, axiosInstance);
 const preferenceApi = new MemberPreferenceApi(config, undefined, axiosInstance);
 const courseApi = new CourseApi(config, undefined, axiosInstance);
 const memberApi = new MemberApi(config, undefined, axiosInstance);
+const weatherApi = new WeatherApi(config, undefined, axiosInstance);
 
 export const completeExploration = async (data: any) => {
   try {
@@ -80,6 +81,26 @@ export const getCourseStopInfo = async (courseId: number, stopOrder: number) => 
     return response.data.data; // CourseExploreResponse
   } catch (error: any) {
     console.error("Getting stop info failed:", error);
+    throw error;
+  }
+};
+
+export const getCurrentWeather = async () => {
+  try {
+    const response = await weatherApi.getCurrentWeather();
+    return response.data.data; // WeatherResponse
+  } catch (error: any) {
+    console.error("Getting weather failed:", error);
+    throw error;
+  }
+};
+
+export const getRandomCourses = async () => {
+  try {
+    const response = await courseApi.getRandomCourses();
+    return response.data.data; // CourseResponse[]
+  } catch (error: any) {
+    console.error("Getting random courses failed:", error);
     throw error;
   }
 };

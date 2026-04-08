@@ -139,7 +139,7 @@ export default function CourseListView() {
             >
               <div style={{ width: "100%", height: "180px", backgroundColor: "#e5e7eb" }}>
                 <img
-                  src={course.imageUrl || "https://picsum.photos/600/300"}
+                  src={course.stops?.[0]?.imageUrl || "https://picsum.photos/600/300"}
                   loading="lazy"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   alt={course.title}

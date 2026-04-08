@@ -47,6 +47,7 @@ export default function HomeClient({ dictionary, lang }: Props) {
   const [mood, setMood] = useState("");
   const [time, setTime] = useState("");
   const [activity, setActivity] = useState("");
+  const [locationPref, setLocationPref] = useState("ANY");
   const [preferenceText, setPreferenceText] = useState("");
 
   useEffect(() => {
@@ -65,33 +66,51 @@ export default function HomeClient({ dictionary, lang }: Props) {
         console.error("Failed to fetch home data:", error);
       }
     };
+
+    const checkPending = async () => {
+      const pending = localStorage.getItem("pendingRecommendation");
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const hasToken = !!localStorage.getItem("accessToken");
+
+      if (pending && isLoggedIn && hasToken) {
+        const parsed = JSON.parse(pending);
+        // 로그인 후 정보를 바로 추천 API로 연결
+        await performRecommendation(parsed);
+      }
+    };
+    
     fetchData();
+    checkPending();
   }, []);
 
-  const handleRecommend = async () => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const hasToken = !!localStorage.getItem("accessToken");
-
-    if (!isLoggedIn || !hasToken) {
-      alert(dictionary.main.loginAlert);
-      router.push(`/${lang}/login`);
-      return;
-    }
-
+  const performRecommendation = async (recommendParams: any) => {
     setIsLoading(true);
     try {
-      // Default coordinates for AI recommendation integration
+      // AI 추천 통합을 위한 기본 좌표 (서울시청)
       let latitude = 37.5665;
       let longitude = 126.9780;
 
+      // 현재 위치 주변 요청 시 좌표 가져오기 시도
+      if (recommendParams.location === "NEARBY" && typeof navigator !== "undefined") {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          });
+          latitude = pos.coords.latitude;
+          longitude = pos.coords.longitude;
+        } catch (e) {
+          console.warn("위치 정보를 가져오지 못했습니다. 기본 좌표를 사용합니다.", e);
+        }
+      }
+
       const response = await recommendCourse({
-        mood: moodMap[mood] || "QUIET",
-        duration: timeMap[time] || "ONE_HOUR",
+        mood: moodMap[recommendParams.mood] || "QUIET",
+        duration: timeMap[recommendParams.time] || "ONE_HOUR",
         level: "ANY",
-        location: "ANY",
+        location: recommendParams.location || "ANY",
         latitude,
         longitude,
-        preferenceText: preferenceText.trim()
+        preferenceText: (recommendParams.preferenceText || "").trim()
       });
       
       if (response && response.length > 0) {
@@ -104,7 +123,25 @@ export default function HomeClient({ dictionary, lang }: Props) {
       router.push(`/${lang}/course`);
     } finally {
       setIsLoading(false);
+      localStorage.removeItem("pendingRecommendation");
     }
+  };
+
+  const handleRecommend = async () => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const hasToken = !!localStorage.getItem("accessToken");
+
+    const currentParams = { mood, time, activity, location: locationPref, preferenceText };
+
+    if (!isLoggedIn || !hasToken) {
+      // 로그인 전 상태 저장
+      localStorage.setItem("pendingRecommendation", JSON.stringify(currentParams));
+      alert(dictionary.main.loginAlert);
+      router.push(`/${lang}/login`);
+      return;
+    }
+
+    await performRecommendation(currentParams);
   };
 
   const handleViewRandom = async () => {
@@ -258,6 +295,41 @@ export default function HomeClient({ dictionary, lang }: Props) {
                   <div className={styles.botAvatar}>
                     <img src="/assets/images/bot.png" alt="Bot" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'contain' }} />
                   </div>
+                  <div className={styles.speechBubble}>어디서 탐방하고 싶으신가요?</div>
+                </div>
+                <div className={styles.optionList}>
+                  {[
+                    { title: "내 주변", desc: "현재 위치 가깝게", icon: "📍", value: "NEARBY" },
+                    { title: "어디든 좋아요", desc: "서울 전체 추천", icon: "🗺️", value: "ANY" }
+                  ].map((option) => (
+                    <button 
+                      key={option.title} 
+                      className={`${styles.optionBtn} ${locationPref === option.value ? styles.selected : ""}`}
+                      onClick={() => {
+                        setLocationPref(option.value);
+                        setChatStep(5);
+                      }}
+                    >
+                      <div className={styles.optionLeft}>
+                        <span className={styles.optionIcon}>{option.icon}</span>
+                        <div className={styles.optionInfo}>
+                          <span className={styles.optionTitle}>{option.title}</span>
+                          <span className={styles.optionDesc}>{option.desc}</span>
+                        </div>
+                      </div>
+                      <ChevronRight size={20} color="#cbd5e1" />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {chatStep === 5 && (
+              <>
+                <div className={styles.botBubble}>
+                  <div className={styles.botAvatar}>
+                    <img src="/assets/images/bot.png" alt="Bot" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'contain' }} />
+                  </div>
                   <div className={styles.speechBubble}>마지막으로 원하는 게 있다면 입력해주세요!</div>
                 </div>
                 <div style={{ marginTop: 10 }}>
@@ -275,18 +347,18 @@ export default function HomeClient({ dictionary, lang }: Props) {
 
           <div className={styles.chatFooter}>
             <div className={styles.stepIndicator}>
-              {[1, 2, 3, 4].map(s => (
+              {[1, 2, 3, 4, 5].map(s => (
                 <div 
                   key={s} 
                   className={`${styles.dot} ${chatStep === s ? styles.active : ""}`} 
                   onClick={() => setChatStep(s)}
-                  style={{ cursor: 'pointer', padding: '10px' }}
+                  style={{ cursor: s <= chatStep ? 'pointer' : 'default', padding: '10px' }}
                 />
               ))}
             </div>
             <button 
-              className={`${styles.submitBtn} ${chatStep === 4 ? styles.active : styles.disabled}`}
-              disabled={chatStep < 4 || isLoading}
+              className={`${styles.submitBtn} ${chatStep === 5 ? styles.active : styles.disabled}`}
+              disabled={chatStep < 5 || isLoading}
               onClick={handleRecommend}
             >
               {isLoading ? "분석 중..." : "AI 코스 추천 받기"}
@@ -367,7 +439,7 @@ export default function HomeClient({ dictionary, lang }: Props) {
             ) : (
               // Empty state or skeleton
               [1, 2, 3].map(i => (
-                <div key={i} className={styles.courseCard} style={{ background: '#f8fafc', height: 160 }}></div>
+                <div key={i} className={styles.courseCard} style={{ background: '#f8fafc', height: 210 }}></div>
               ))
             )}
           </div>

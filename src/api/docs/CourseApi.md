@@ -8,6 +8,7 @@ All URIs are relative to *http://localhost:8080*
 |[**getCourseDetail**](#getcoursedetail) | **GET** /api/v1/courses/{courseId} | 코스 상세 정보 조회|
 |[**getCourseStopInfo**](#getcoursestopinfo) | **GET** /api/v1/courses/{courseId}/stops/{stopOrder} | 경유지 상세 정보 조회|
 |[**getExploreRecordResult**](#getexplorerecordresult) | **GET** /api/v1/courses/records/{recordId} | 탐방 기록 상세 조회|
+|[**getRandomCourses**](#getrandomcourses) | **GET** /api/v1/courses/random | 랜덤 코스 조회|
 |[**recommend**](#recommend) | **POST** /api/v1/courses/recommend | 맞춤 코스 추천|
 
 # **completeExploration**
@@ -200,6 +201,50 @@ const { status, data } = await apiInstance.getExploreRecordResult(
 ### Return type
 
 **ApiResponseCourseRecordResultResponse**
+
+### Authorization
+
+[jwtAuth](../README.md#jwtAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: */*
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getRandomCourses**
+> ApiResponseListCourseResponse getRandomCourses()
+
+홈 화면용으로 C0001~C0010 중 랜덤으로 3개의 코스를 반환합니다.
+
+### Example
+
+```typescript
+import {
+    CourseApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new CourseApi(configuration);
+
+const { status, data } = await apiInstance.getRandomCourses();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**ApiResponseListCourseResponse**
 
 ### Authorization
 

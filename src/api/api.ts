@@ -77,6 +77,12 @@ export interface ApiResponseVoid {
     'message'?: string;
     'data'?: object;
 }
+export interface ApiResponseWeatherResponse {
+    'timestamp'?: string;
+    'status'?: number;
+    'message'?: string;
+    'data'?: WeatherResponse;
+}
 export interface BadgeInfo {
     'code'?: string;
     'name'?: string;
@@ -255,6 +261,14 @@ export interface UserInfo {
     'name'?: string;
     'level'?: number;
     'levelName'?: string;
+}
+export interface WeatherResponse {
+    'temp'?: string;
+    'rainType'?: string;
+    'rainAmount'?: string;
+    'humidity'?: string;
+    'baseDate'?: string;
+    'baseTime'?: string;
 }
 
 /**
@@ -812,6 +826,40 @@ export const CourseApiAxiosParamCreator = function (configuration?: Configuratio
             };
         },
         /**
+         * 홈 화면용으로 C0001~C0010 중 랜덤으로 3개의 코스를 반환합니다.
+         * @summary 랜덤 코스 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRandomCourses: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/courses/random`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
          * @summary 맞춤 코스 추천
          * @param {CourseRequest} [courseRequest] 
@@ -911,6 +959,18 @@ export const CourseApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * 홈 화면용으로 C0001~C0010 중 랜덤으로 3개의 코스를 반환합니다.
+         * @summary 랜덤 코스 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRandomCourses(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseListCourseResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRandomCourses(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CourseApi.getRandomCourses']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
          * @summary 맞춤 코스 추천
          * @param {CourseRequest} [courseRequest] 
@@ -974,6 +1034,15 @@ export const CourseApiFactory = function (configuration?: Configuration, basePat
             return localVarFp.getExploreRecordResult(recordId, options).then((request) => request(axios, basePath));
         },
         /**
+         * 홈 화면용으로 C0001~C0010 중 랜덤으로 3개의 코스를 반환합니다.
+         * @summary 랜덤 코스 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRandomCourses(options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseListCourseResponse> {
+            return localVarFp.getRandomCourses(options).then((request) => request(axios, basePath));
+        },
+        /**
          * 분위기, 소요 시간, 난이도 등 유저 설정에 맞는 AI 추천 코스를 제안합니다.
          * @summary 맞춤 코스 추천
          * @param {CourseRequest} [courseRequest] 
@@ -1033,6 +1102,16 @@ export class CourseApi extends BaseAPI {
      */
     public getExploreRecordResult(recordId: number, options?: RawAxiosRequestConfig) {
         return CourseApiFp(this.configuration).getExploreRecordResult(recordId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 홈 화면용으로 C0001~C0010 중 랜덤으로 3개의 코스를 반환합니다.
+     * @summary 랜덤 코스 조회
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getRandomCourses(options?: RawAxiosRequestConfig) {
+        return CourseApiFp(this.configuration).getRandomCourses(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1248,6 +1327,104 @@ export class MemberPreferenceApi extends BaseAPI {
      */
     public savePreference(courseRequest: CourseRequest, options?: RawAxiosRequestConfig) {
         return MemberPreferenceApiFp(this.configuration).savePreference(courseRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * WeatherApi - axios parameter creator
+ */
+export const WeatherApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 기상청에서 수집한 가장 최근의 날씨 정보를 반환합니다.
+         * @summary 현재 날씨 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCurrentWeather: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/weather/current`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication jwtAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = '*/*';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * WeatherApi - functional programming interface
+ */
+export const WeatherApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = WeatherApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 기상청에서 수집한 가장 최근의 날씨 정보를 반환합니다.
+         * @summary 현재 날씨 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getCurrentWeather(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiResponseWeatherResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCurrentWeather(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['WeatherApi.getCurrentWeather']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * WeatherApi - factory interface
+ */
+export const WeatherApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = WeatherApiFp(configuration)
+    return {
+        /**
+         * 기상청에서 수집한 가장 최근의 날씨 정보를 반환합니다.
+         * @summary 현재 날씨 조회
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCurrentWeather(options?: RawAxiosRequestConfig): AxiosPromise<ApiResponseWeatherResponse> {
+            return localVarFp.getCurrentWeather(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * WeatherApi - object-oriented interface
+ */
+export class WeatherApi extends BaseAPI {
+    /**
+     * 기상청에서 수집한 가장 최근의 날씨 정보를 반환합니다.
+     * @summary 현재 날씨 조회
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getCurrentWeather(options?: RawAxiosRequestConfig) {
+        return WeatherApiFp(this.configuration).getCurrentWeather(options).then((request) => request(this.axios, this.basePath));
     }
 }
 

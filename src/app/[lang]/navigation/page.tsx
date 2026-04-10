@@ -154,9 +154,17 @@ export default function NavigationView() {
     );
   }
 
-  const totalDistance = courseData.summary?.distanceKm || 4.2;
-  const currentProgressDist = (currentStopOrder / (courseData.stops?.length || 1)) * totalDistance;
-  const progressPercent = Math.min(Math.round((currentStopOrder / (courseData.stops?.length || 1)) * 100), 100);
+  const totalDistKm = courseData.stops?.reduce((acc: number, stop: any) => acc + (stop.distanceFromPrev || 0), 0) || 0;
+  const displayTotalDistKm = courseData.summary?.distanceKm || totalDistKm;
+  
+  // 실제로 이동한 거리: 현재 경유지 이전까지의 모든 구간 거리 합계 (단위: km)
+  const completedDistKmValue = courseData.stops?.slice(0, currentStopOrder - 1).reduce((acc: number, stop: any) => acc + (stop.distanceFromPrev || 0), 0) || 0;
+  
+  const progressPercent = totalDistKm > 0 
+    ? Math.min(Math.round((completedDistKmValue / totalDistKm) * 100), 100)
+    : 0;
+  
+  const completedDistKm = completedDistKmValue.toFixed(2);
 
   return (
     <div
@@ -183,7 +191,7 @@ export default function NavigationView() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: "600" }}>
             <Bike size={16} color="#59d58d" />
-            <span>{t.totalOf} {totalDistance}{t.kmOf} <span style={{ color: "#59d58d" }}>{currentProgressDist.toFixed(2)}km {t.progress}</span></span>
+            <span>{t.totalOf} {displayTotalDistKm}{t.kmOf} <span style={{ color: "#59d58d" }}>{completedDistKm}km {t.progress}</span></span>
           </div>
           <div style={{ fontSize: "12px", color: "#9ca3af" }}>{progressPercent}%</div>
         </div>
@@ -215,57 +223,100 @@ export default function NavigationView() {
               const isFirst = index === 0;
 
               return (
-                <div 
-                  key={index} 
-                  style={{ 
-                    display: "flex", 
-                    padding: "16px 0", 
-                    position: "relative",
-                    backgroundColor: isCurrent ? "rgba(89, 213, 141, 0.05)" : "transparent",
-                    borderRadius: isCurrent ? "16px" : "0",
-                    marginLeft: "-10px",
-                    paddingLeft: "10px",
-                    marginRight: "-10px",
-                    paddingRight: "10px",
-                  }}
-                >
-                  <div style={{ width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1, backgroundColor: isVisited ? "#59d58d" : "white", border: isVisited ? "none" : (isCurrent ? "2px solid #59d58d" : "2px solid #e5e7eb") }}>
-                    {isVisited ? (
-                      <Check size={18} color="white" />
-                    ) : (
-                      isCurrent ? (
-                        <MapPin size={18} color="#59d58d" />
-                      ) : (
-                        <span style={{ fontSize: "13px", fontWeight: "600", color: "#9ca3af" }}>{order}</span>
-                      )
-                    )}
-                  </div>
-
-                  <div style={{ flex: 1, marginLeft: "16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
-                      {isFirst && <span style={{ fontSize: "14px", fontWeight: "700", color: isVisited ? "#59d58d" : (isCurrent ? "#59d58d" : "#9ca3af") }}>{t.startPoint}</span>}
-                      <span style={{ fontSize: "16px", fontWeight: "700", color: isCurrent || isVisited ? "#111827" : "#9ca3af" }}>{stop.name}</span>
-                      {isVisited && (
-                        <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "10px", backgroundColor: "#f3f4f6", color: "#9ca3af", fontWeight: "600" }}>{t.visited}</span>
-                      )}
-                      {isCurrent && (
-                        <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", backgroundColor: "#59d58d", color: "white", fontWeight: "600" }}>{t.nextDest}</span>
-                      )}
-                    </div>
-                    <div style={{ fontSize: "13px", color: "#9ca3af", marginBottom: isCurrent ? "8px" : "0" }}>
-                      {index === 0 ? t.bikeStation : (stop.summary || t.defaultPlace)}
-                    </div>
-                    
-                    {isCurrent && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#59d58d", fontSize: "13px", fontWeight: "600", marginTop: "4px" }}>
-                        <Navigation2 size={12} fill="#59d58d" strokeWidth={3} />
-                        <span>{t.aboutMin}</span>
+                <div key={index}>
+                  {/* 경유지 사이의 거리 표시 */}
+                  {!isFirst && (
+                    <div style={{ 
+                      marginLeft: "15px", 
+                      height: "30px", 
+                      display: "flex", 
+                      alignItems: "center", 
+                      position: "relative" 
+                    }}>
+                      <div style={{ 
+                        marginLeft: "24px", 
+                        fontSize: "12px", 
+                        color: "#9ca3af", 
+                        fontWeight: "600",
+                        backgroundColor: "#f9fafb",
+                        padding: "2px 8px",
+                        borderRadius: "10px",
+                        border: "1px solid #f3f4f6",
+                        display: "flex",
+                        gap: "6px",
+                        alignItems: "center"
+                      }}>
+                        <span>
+                          {stop.distanceFromPrev >= 1 
+                            ? `${stop.distanceFromPrev.toFixed(1)}km` 
+                            : `${Math.round(stop.distanceFromPrev * 1000)}m`}
+                        </span>
+                        {stop.durationFromPrev > 0 && (
+                          <>
+                            <span style={{ color: "#e5e7eb" }}>|</span>
+                            <span>{Math.round(stop.durationFromPrev)}{lang === 'ko' ? '분' : ' min'}</span>
+                          </>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  <div style={{ fontSize: "13px", color: "#9ca3af", paddingLeft: "10px", textAlign: "right", minWidth: "50px" }}>
-                    {index === 0 ? "0km" : index === 1 ? "850m" : `${(index * 0.8).toFixed(1)}km`}
+                  <div 
+                    style={{ 
+                      display: "flex", 
+                      padding: "16px 0", 
+                      position: "relative",
+                      backgroundColor: isCurrent ? "rgba(89, 213, 141, 0.05)" : "transparent",
+                      borderRadius: isCurrent ? "16px" : "0",
+                    }}
+                  >
+                    <div style={{ 
+                      display: "flex",
+                      width: "100%",
+                      marginLeft: "-10px",
+                      paddingLeft: "10px",
+                      marginRight: "-10px",
+                      paddingRight: "10px",
+                    }}>
+                      <div style={{ width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1, backgroundColor: isVisited ? "#59d58d" : "white", border: isVisited ? "none" : (isCurrent ? "2px solid #59d58d" : "2px solid #e5e7eb") }}>
+                        {isVisited ? (
+                          <Check size={18} color="white" />
+                        ) : (
+                          isCurrent ? (
+                            <MapPin size={18} color="#59d58d" />
+                          ) : (
+                            <span style={{ fontSize: "13px", fontWeight: "600", color: "#9ca3af" }}>{order}</span>
+                          )
+                        )}
+                      </div>
+
+                      <div style={{ flex: 1, marginLeft: "16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+                          {isFirst && <span style={{ fontSize: "14px", fontWeight: "700", color: isVisited ? "#59d58d" : (isCurrent ? "#59d58d" : "#9ca3af") }}>{t.startPoint}</span>}
+                          <span style={{ fontSize: "16px", fontWeight: "700", color: isCurrent || isVisited ? "#111827" : "#9ca3af" }}>{stop.name}</span>
+                          {isVisited && (
+                            <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "10px", backgroundColor: "#f3f4f6", color: "#9ca3af", fontWeight: "#600" }}>{t.visited}</span>
+                          )}
+                          {isCurrent && (
+                            <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", backgroundColor: "#59d58d", color: "white", fontWeight: "600" }}>{t.nextDest}</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: "13px", color: "#9ca3af", marginBottom: isCurrent ? "8px" : "0" }}>
+                          {index === 0 ? t.bikeStation : (stop.summary || t.defaultPlace)}
+                        </div>
+                        
+                        {isCurrent && (
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#59d58d", fontSize: "13px", fontWeight: "600", marginTop: "4px" }}>
+                            <Navigation2 size={12} fill="#59d58d" strokeWidth={3} />
+                            <span>
+                              {lang === 'ko' 
+                                ? `약 ${Math.round(stop.durationFromPrev || 5)}분 소요` 
+                                : `About ${Math.round(stop.durationFromPrev || 5)} min`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );

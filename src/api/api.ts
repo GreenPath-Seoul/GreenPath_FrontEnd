@@ -109,6 +109,8 @@ export interface CourseExploreResponse {
     'latitude'?: number;
     'longitude'?: number;
     'imageUrl'?: string;
+    'distanceFromPrev'?: number;
+    'durationFromPrev'?: number;
 }
 export interface CourseRecordResultResponse {
     'recordId'?: number;
@@ -177,6 +179,8 @@ export interface CourseStop {
     'latitude'?: number;
     'longitude'?: number;
     'imageUrl'?: string;
+    'distanceFromPrev'?: number;
+    'durationFromPrev'?: number;
 }
 export interface CourseSummary {
     'distanceKm'?: number;

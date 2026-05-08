@@ -23,7 +23,7 @@ export default function LoginView() {
   // ✅ 번역 텍스트
   const text = {
     ko: {
-      title: "Seoul Renaissance Ride",
+      title: "Green Path",
       subtitle: "탐방을 위해 로그인을 해주세요",
       emailPlaceholder: "이메일 (아이디)",
       passwordPlaceholder: "비밀번호",
@@ -38,7 +38,7 @@ export default function LoginView() {
       loginError: "로그인 중 오류가 발생했습니다."
     },
     en: {
-      title: "Seoul Renaissance Ride",
+      title: "Green Path",
       subtitle: "Please log in to start your journey",
       emailPlaceholder: "Email",
       passwordPlaceholder: "Password",

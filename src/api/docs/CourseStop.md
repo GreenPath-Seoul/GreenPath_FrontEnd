@@ -14,6 +14,8 @@ Name | Type | Description | Notes
 **latitude** | **number** |  | [optional] [default to undefined]
 **longitude** | **number** |  | [optional] [default to undefined]
 **imageUrl** | **string** |  | [optional] [default to undefined]
+**distanceFromPrev** | **number** |  | [optional] [default to undefined]
+**durationFromPrev** | **number** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -30,6 +32,8 @@ const instance: CourseStop = {
     latitude,
     longitude,
     imageUrl,
+    distanceFromPrev,
+    durationFromPrev,
 };
 ```
 

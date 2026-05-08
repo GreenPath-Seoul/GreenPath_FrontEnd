@@ -88,7 +88,7 @@ export default function SignupView() {
   const handleSignup = async () => {
     const eErr = validateEmail(id);
     const pErr = validatePassword(pw);
-    
+
     if (!name) {
       alert("이름을 입력해주세요.");
       return;
@@ -143,11 +143,11 @@ export default function SignupView() {
       <div style={{ padding: "20px 0", display: "flex", alignItems: "center" }}>
         <button
           onClick={() => router.back()}
-          style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
-            width: "40px", 
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "40px",
             height: "40px",
             borderRadius: "50%",
             backgroundColor: "#f9fafb",
@@ -161,20 +161,20 @@ export default function SignupView() {
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: "20px" }}>
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <div style={{ 
-            width: "64px", 
-            height: "64px", 
-            backgroundColor: "#ecfdf5", 
-            borderRadius: "20px", 
-            display: "flex", 
-            alignItems: "center", 
+          <div style={{
+            width: "64px",
+            height: "64px",
+            backgroundColor: "#ecfdf5",
+            borderRadius: "20px",
+            display: "flex",
+            alignItems: "center",
             justifyContent: "center",
             margin: "0 auto",
             marginBottom: "16px"
           }}>
             <Bike size={32} color="#10b981" />
           </div>
-          <h1 style={{ fontSize: "24px", fontWeight: "700", color: "#111827", letterSpacing: "-0.5px" }}>Seoul Renaissance Ride</h1>
+          <h1 style={{ fontSize: "24px", fontWeight: "700", color: "#111827", letterSpacing: "-0.5px" }}>Green Path</h1>
           <p style={{ color: "#6b7280", marginTop: "8px", fontSize: "14px" }}>나만의 탐방을 위한 계정을 만들어주세요</p>
         </div>
 
@@ -187,10 +187,10 @@ export default function SignupView() {
               placeholder="홍길동"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={{ 
-                padding: "16px", 
-                borderRadius: "14px", 
-                border: "1px solid #e5e7eb", 
+              style={{
+                padding: "16px",
+                borderRadius: "14px",
+                border: "1px solid #e5e7eb",
                 fontSize: "16px",
                 backgroundColor: "#f9fafb",
                 transition: "all 0.2s"
@@ -203,17 +203,17 @@ export default function SignupView() {
             <label style={{ fontSize: "14px", fontWeight: "600", color: "#374151", marginLeft: "4px" }}>이메일</label>
             <div style={{ display: "flex", gap: "8px" }}>
               <div style={{ flex: 1, position: "relative" }}>
-                <input 
-                  type="email" 
-                  placeholder="example@email.com" 
+                <input
+                  type="email"
+                  placeholder="example@email.com"
                   value={id}
                   onChange={(e) => setId(e.target.value)}
-                  style={{ 
+                  style={{
                     width: "100%",
-                    padding: "16px", 
+                    padding: "16px",
                     paddingRight: isEmailChecked ? "40px" : "16px",
-                    borderRadius: "14px", 
-                    border: `1px solid ${emailError ? "#ef4444" : "#e5e7eb"}`, 
+                    borderRadius: "14px",
+                    border: `1px solid ${emailError ? "#ef4444" : "#e5e7eb"}`,
                     fontSize: "16px",
                     backgroundColor: "#f9fafb"
                   }}
@@ -222,13 +222,13 @@ export default function SignupView() {
                   <CheckCircle2 size={20} color="#10b981" style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }} />
                 )}
               </div>
-              <button 
+              <button
                 onClick={handleEmailCheck}
                 disabled={isCheckingEmail || !id || !!validateEmail(id)}
-                style={{ 
-                  padding: "0 16px", 
-                  borderRadius: "14px", 
-                  backgroundColor: isEmailChecked ? "#f3f4f6" : "#111827", 
+                style={{
+                  padding: "0 16px",
+                  borderRadius: "14px",
+                  backgroundColor: isEmailChecked ? "#f3f4f6" : "#111827",
                   color: isEmailChecked ? "#9ca3af" : "#ffffff",
                   fontSize: "14px",
                   fontWeight: "600",
@@ -253,15 +253,15 @@ export default function SignupView() {
           {/* Password Input */}
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <label style={{ fontSize: "14px", fontWeight: "600", color: "#374151", marginLeft: "4px" }}>비밀번호</label>
-            <input 
-              type="password" 
-              placeholder="비밀번호 입력" 
+            <input
+              type="password"
+              placeholder="비밀번호 입력"
               value={pw}
               onChange={(e) => setPw(e.target.value)}
-              style={{ 
-                padding: "16px", 
-                borderRadius: "14px", 
-                border: `1px solid ${pwError ? "#ef4444" : "#e5e7eb"}`, 
+              style={{
+                padding: "16px",
+                borderRadius: "14px",
+                border: `1px solid ${pwError ? "#ef4444" : "#e5e7eb"}`,
                 fontSize: "16px",
                 backgroundColor: "#f9fafb"
               }}
@@ -274,15 +274,15 @@ export default function SignupView() {
           {/* Password Confirm Input */}
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <label style={{ fontSize: "14px", fontWeight: "600", color: "#374151", marginLeft: "4px" }}>비밀번호 확인</label>
-            <input 
-              type="password" 
-              placeholder="비밀번호 재입력" 
+            <input
+              type="password"
+              placeholder="비밀번호 재입력"
               value={pwConfirm}
               onChange={(e) => setPwConfirm(e.target.value)}
-              style={{ 
-                padding: "16px", 
-                borderRadius: "14px", 
-                border: `1px solid ${pwConfirmError ? "#ef4444" : "#e5e7eb"}`, 
+              style={{
+                padding: "16px",
+                borderRadius: "14px",
+                border: `1px solid ${pwConfirmError ? "#ef4444" : "#e5e7eb"}`,
                 fontSize: "16px",
                 backgroundColor: "#f9fafb"
               }}
@@ -296,8 +296,8 @@ export default function SignupView() {
         <button
           className="btn-primary"
           onClick={handleSignup}
-          style={{ 
-            padding: "18px", 
+          style={{
+            padding: "18px",
             borderRadius: "16px",
             fontSize: "16px",
             fontWeight: "700",
